@@ -3,6 +3,12 @@
 #include <windows.h>
 #include <assert.h>
 
+/*
+ * Operation of WonGradientFill function will be done by linear interpolation,
+ * using fixed point numbers.
+ */
+
+/* Some C compilers don't support inline keyword. Use __inline instread if so. */
 #ifndef INLINE
     #ifdef __cplusplus
         #define INLINE inline
@@ -11,6 +17,7 @@
     #endif
 #endif
 
+/* Bayer Dithering */
 /* https://en.wikipedia.org/wiki/Ordered_dithering */
 static INLINE BYTE BayerDithering(ULONG x, ULONG y, BYTE b)
 {
@@ -47,15 +54,18 @@ typedef struct XYMINMAX
     LONG xMin, yMin, xMax, yMax;
 } XYMINMAX;
 
+/* Calculate the extent of the verteces */
 static INLINE void
 GetXYMinMax(XYMINMAX *pXYMinMax, TRIVERTEX *pTriVertex, ULONG dwNumVertex)
 {
     ULONG i;
     LONG x, y, xMin, yMin, xMax, yMax;
 
+    /* first vertex */
     xMin = xMax = pTriVertex[0].x;
     yMin = yMax = pTriVertex[0].y;
 
+    /* get min/max */
     for (i = 1; i < dwNumVertex; ++i)
     {
         x = pTriVertex[i].x;
@@ -70,6 +80,7 @@ GetXYMinMax(XYMINMAX *pXYMinMax, TRIVERTEX *pTriVertex, ULONG dwNumVertex)
             yMax = y;
     }
 
+    /* store it */
     pXYMinMax->xMin = xMin;
     pXYMinMax->yMin = yMin;
     pXYMinMax->xMax = xMax;
@@ -82,10 +93,11 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
 {
     COLOR16 r1, g1, b1, a1;
     COLOR16 dr, dg, db, da;
-    INT dx, dy, x1, y1;
+    LONG dx, dy, x1, y1;
     ULONG stride;
     LPBYTE pb;
 
+    /* sort v1, v2 by x */
     const TRIVERTEX *v1 = pTriVertex + rect->UpperLeft;
     const TRIVERTEX *v2 = pTriVertex + rect->LowerRight;
     if (v1->x > v2->x)
@@ -96,13 +108,14 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
     }
     assert(v1->x <= v2->x);
 
-    dx = v2->x - v1->x;
-    dy = v2->y - v1->y;
     r1 = v1->Red;
     g1 = v1->Green;
     b1 = v1->Blue;
     a1 = v1->Alpha;
 
+    /* calculate delta's */
+    dx = v2->x - v1->x;
+    dy = v2->y - v1->y;
     if (dx != 0)
     {
         dr = (v2->Red - v1->Red) / dx;
@@ -111,6 +124,7 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
         da = (v2->Alpha - v1->Alpha) / dx;
     }
 
+    /* calculate the first position */
     if (dy < 0)
     {
         pb = pbBits + ((v2->y - yMin) * cx + (v1->x - xMin)) * 4;
@@ -121,42 +135,55 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
         pb = pbBits + ((v1->y - yMin) * cx + (v1->x - xMin)) * 4;
     }
 
-    stride = cx * 4;
+    stride = cx * 4;    /* one row width */
+
     if (bDither)
     {
+        /* fill rectangle horizontally (dithering) */
         for (x1 = 0; x1 < dx; x1++)
         {
+            /* render the column */
             for (y1 = 0; y1 < dy; y1++)
             {
                 *pb++ = BayerDithering(x1, y1, b1 >> 8);
                 *pb++ = BayerDithering(x1, y1, g1 >> 8);
                 *pb++ = BayerDithering(x1, y1, r1 >> 8);
-                pb++;
-                pb += stride - 4;
+                pb++;   /* skip alpha value */
+
+                pb += stride - 4;   /* next position */
             }
+
+            /* add delta's values */
             r1 += dr;
             g1 += dg;
             b1 += db;
-            pb -= dy * stride - 4;
+
+            pb -= dy * stride - 4;  /* next position */
         }
     }
     else
     {
+        /* fill rectangle horizontally (w/o dithering) */
         for (x1 = 0; x1 < dx; x1++)
         {
+            /* render the column */
             for (y1 = 0; y1 < dy; y1++)
             {
                 *pb++ = b1 >> 8;
                 *pb++ = g1 >> 8;
                 *pb++ = r1 >> 8;
                 *pb++ = a1 >> 8;
-                pb += stride - 4;
+
+                pb += stride - 4;   /* next position */
             }
+
+            /* add delta's values */
             r1 += dr;
             g1 += dg;
             b1 += db;
             a1 += da;
-            pb -= dy * stride - 4;
+
+            pb -= dy * stride - 4;  /* next position */
         }
     }
 }
@@ -167,10 +194,11 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
 {
     COLOR16 r1, g1, b1, a1;
     COLOR16 dr, dg, db, da;
-    INT dx, dy, x1, y1;
+    LONG dx, dy, x1, y1;
     ULONG stride;
     LPBYTE pb;
 
+    /* sort v1, v2 by y */
     const TRIVERTEX *v1 = pTriVertex + rect->UpperLeft;
     const TRIVERTEX *v2 = pTriVertex + rect->LowerRight;
     if (v1->y > v2->y)
@@ -181,13 +209,14 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
     }
     assert(v1->y <= v2->y);
 
-    dx = v2->x - v1->x;
-    dy = v2->y - v1->y;
     r1 = v1->Red;
     g1 = v1->Green;
     b1 = v1->Blue;
     a1 = v1->Alpha;
 
+    /* calculate delta's */
+    dx = v2->x - v1->x;
+    dy = v2->y - v1->y;
     if (dy != 0)
     {
         dr = (v2->Red - v1->Red) / dy;
@@ -196,6 +225,7 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
         da = (v2->Alpha - v1->Alpha) / dy;
     }
 
+    /* calculate the first position */
     if (dx < 0)
     {
         pb = pbBits + ((v1->y - yMin) * cx + (v2->x - xMin)) * 4;
@@ -206,29 +236,38 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
         pb = pbBits + ((v1->y - yMin) * cx + (v1->x - xMin)) * 4;
     }
 
-    stride = cx * 4;
+    stride = cx * 4;    /* one row width */
+
     if (bDither)
     {
+        /* fill rectangle vertically (dithering) */
         for (y1 = 0; y1 < dy; y1++)
         {
+            /* render one row */
             for (x1 = 0; x1 < dx; x1++)
             {
                 *pb++ = BayerDithering(x1, y1, b1 >> 8);
                 *pb++ = BayerDithering(x1, y1, g1 >> 8);
                 *pb++ = BayerDithering(x1, y1, r1 >> 8);
-                pb++;
+                pb++;   /* skip alpha value */
             }
+
+            /* add delta's values */
             r1 += dr;
             g1 += dg;
             b1 += db;
+
+            /* next position */
             pb -= dx * 4;
             pb += stride;
         }
     }
     else
     {
+        /* fill rectangle vertically (w/o dithering) */
         for (y1 = 0; y1 < dy; y1++)
         {
+            /* render one row */
             for (x1 = 0; x1 < dx; x1++)
             {
                 *pb++ = b1 >> 8;
@@ -236,10 +275,14 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
                 *pb++ = r1 >> 8;
                 *pb++ = a1 >> 8;
             }
+
+            /* add delta's values */
             r1 += dr;
             g1 += dg;
             b1 += db;
             a1 += da;
+
+            /* next position */
             pb -= dx * 4;
             pb += stride;
         }
@@ -256,16 +299,20 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
 {
     COLOR16 r1, g1, b1, a1, r2, g2, b2, a2;
     COLOR16 dr, dg, db, da;
-    INT dx, x1, y1, x2;
+    LONG dx, x1, y1, x2;
     LPBYTE pb;
-    ULONG stride = cx * 4;
+    ULONG stride = cx * 4;    /* one row width */
+
+    assert(v1->y <= v2->y && v2->y <= v3->y);
 
     if (bDither)
     {
+        /* the upper triangle (dithering) */
         for (y1 = v1->y; y1 < v2->y; y1++)
         {
             if (v2->x < v3->x)
             {
+                /* calculate the edge values */
                 x1 = v1->x + (v2->x - v1->x) * (y1 - v1->y) / (v2->y - v1->y);
                 r1 = (COLOR16)(v1->Red   + (v2->Red   - v1->Red)   * (y1 - v1->y) / (v2->y - v1->y));
                 g1 = (COLOR16)(v1->Green + (v2->Green - v1->Green) * (y1 - v1->y) / (v2->y - v1->y));
@@ -274,6 +321,8 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 r2 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
                 g2 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
                 b2 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
+
+                /* calculate delta's */
                 dx = x2 - x1;
                 if (dx != 0)
                 {
@@ -281,13 +330,19 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     dg = (g2 - g1) / dx;
                     dr = (r2 - r1) / dx;
                 }
+
+                /* calculate the first position */
                 pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
+
+                /* do rendering */
                 for ( ; x1 < x2; x1++)
                 {
                     *pb++ = BayerDithering(x1, y1, b1 >> 8);
                     *pb++ = BayerDithering(x1, y1, g1 >> 8);
                     *pb++ = BayerDithering(x1, y1, r1 >> 8);
-                    pb++;
+                    pb++;   /* skip alpha value */
+
+                    /* add delta's values */
                     b1 += db;
                     g1 += dg;
                     r1 += dr;
@@ -295,6 +350,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             }
             else
             {
+                /* calculate the edge values */
                 x1 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
                 r1 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
                 g1 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
@@ -303,6 +359,8 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 r2 = (COLOR16)(v1->Red   + (v2->Red   - v1->Red)   * (y1 - v1->y) / (v2->y - v1->y));
                 g2 = (COLOR16)(v1->Green + (v2->Green - v1->Green) * (y1 - v1->y) / (v2->y - v1->y));
                 b2 = (COLOR16)(v1->Blue  + (v2->Blue  - v1->Blue)  * (y1 - v1->y) / (v2->y - v1->y));
+
+                /* calculate delta's */
                 dx = x2 - x1;
                 if (dx != 0)
                 {
@@ -310,23 +368,31 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     dg = (g2 - g1) / dx;
                     dr = (r2 - r1) / dx;
                 }
+
+                /* calculate the first position */
                 pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
+
+                /* do rendering */
                 for ( ; x1 < x2; x1++)
                 {
                     *pb++ = BayerDithering(x1, y1, b1 >> 8);
                     *pb++ = BayerDithering(x1, y1, g1 >> 8);
                     *pb++ = BayerDithering(x1, y1, r1 >> 8);
-                    pb++;
+                    pb++;   /* skip alpha value */
+
+                    /* add delta's values */
                     b1 += db;
                     g1 += dg;
                     r1 += dr;
                 }
             }
         }
+        /* the lower triangle (dithering) */
         for (y1 = v2->y; y1 < v3->y; y1++)
         {
             if (v2->x < v3->x)
             {
+                /* calculate the edge values */
                 x1 = v2->x + (v3->x - v2->x) * (y1 - v2->y) / (v3->y - v2->y);
                 r1 = (COLOR16)(v2->Red   + (v3->Red   - v2->Red)   * (y1 - v2->y) / (v3->y - v2->y));
                 g1 = (COLOR16)(v2->Green + (v3->Green - v2->Green) * (y1 - v2->y) / (v3->y - v2->y));
@@ -335,6 +401,8 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 r2 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
                 g2 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
                 b2 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
+
+                /* calculate delta's */
                 dx = x2 - x1;
                 if (dx != 0)
                 {
@@ -342,13 +410,19 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     dg = (g2 - g1) / dx;
                     dr = (r2 - r1) / dx;
                 }
+
+                /* calculate the first position */
                 pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
+
+                /* do rendering */
                 for ( ; x1 < x2; x1++)
                 {
                     *pb++ = BayerDithering(x1, y1, b1 >> 8);
                     *pb++ = BayerDithering(x1, y1, g1 >> 8);
                     *pb++ = BayerDithering(x1, y1, r1 >> 8);
-                    pb++;
+                    pb++;   /* skip alpha value */
+
+                    /* add delta's values */
                     b1 += db;
                     g1 += dg;
                     r1 += dr;
@@ -356,6 +430,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             }
             else
             {
+                /* calculate the edge values */
                 x1 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
                 r1 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
                 g1 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
@@ -364,6 +439,8 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 r2 = (COLOR16)(v2->Red   + (v3->Red   - v2->Red)   * (y1 - v2->y) / (v3->y - v2->y));
                 g2 = (COLOR16)(v2->Green + (v3->Green - v2->Green) * (y1 - v2->y) / (v3->y - v2->y));
                 b2 = (COLOR16)(v2->Blue  + (v3->Blue  - v2->Blue)  * (y1 - v2->y) / (v3->y - v2->y));
+
+                /* calculate delta's */
                 dx = x2 - x1;
                 if (dx != 0)
                 {
@@ -371,13 +448,19 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     dg = (g2 - g1) / dx;
                     dr = (r2 - r1) / dx;
                 }
+
+                /* calculate the first position */
                 pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
+
+                /* do rendering */
                 for ( ; x1 < x2; x1++)
                 {
                     *pb++ = BayerDithering(x1, y1, b1 >> 8);
                     *pb++ = BayerDithering(x1, y1, g1 >> 8);
                     *pb++ = BayerDithering(x1, y1, r1 >> 8);
-                    pb++;
+                    pb++;   /* skip alpha value */
+
+                    /* add delta's values */
                     b1 += db;
                     g1 += dg;
                     r1 += dr;
@@ -387,10 +470,12 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
     }
     else
     {
+        /* the upper triangle (w/o dithering) */
         for (y1 = v1->y; y1 < v2->y; y1++)
         {
             if (v2->x < v3->x)
             {
+                /* calculate the edge values */
                 x1 = v1->x + (v2->x - v1->x) * (y1 - v1->y) / (v2->y - v1->y);
                 r1 = (COLOR16)(v1->Red   + (v2->Red   - v1->Red)   * (y1 - v1->y) / (v2->y - v1->y));
                 g1 = (COLOR16)(v1->Green + (v2->Green - v1->Green) * (y1 - v1->y) / (v2->y - v1->y));
@@ -401,6 +486,8 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 g2 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
                 b2 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
                 a2 = (COLOR16)(v1->Alpha + (v3->Alpha - v1->Alpha) * (y1 - v1->y) / (v3->y - v1->y));
+
+                /* calculate delta's */
                 dx = x2 - x1;
                 if (dx != 0)
                 {
@@ -409,13 +496,19 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     dr = (r2 - r1) / dx;
                     da = (a2 - a1) / dx;
                 }
+
+                /* calculate the first position */
                 pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
+
+                /* do rendering */
                 for ( ; x1 < x2; x1++)
                 {
                     *pb++ = b1 >> 8;
                     *pb++ = g1 >> 8;
                     *pb++ = r1 >> 8;
                     *pb++ = a1 >> 8;
+
+                    /* add delta's values */
                     b1 += db;
                     g1 += dg;
                     r1 += dr;
@@ -424,6 +517,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             }
             else
             {
+                /* calculate the edge values */
                 x1 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
                 r1 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
                 g1 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
@@ -434,6 +528,8 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 g2 = (COLOR16)(v1->Green + (v2->Green - v1->Green) * (y1 - v1->y) / (v2->y - v1->y));
                 b2 = (COLOR16)(v1->Blue  + (v2->Blue  - v1->Blue)  * (y1 - v1->y) / (v2->y - v1->y));
                 a2 = (COLOR16)(v1->Alpha + (v2->Alpha - v1->Alpha) * (y1 - v1->y) / (v2->y - v1->y));
+
+                /* calculate delta's */
                 dx = x2 - x1;
                 if (dx != 0)
                 {
@@ -442,13 +538,19 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     dr = (r2 - r1) / dx;
                     da = (a2 - a1) / dx;
                 }
+
+                /* calculate the first position */
                 pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
+
+                /* do rendering */
                 for ( ; x1 < x2; x1++)
                 {
                     *pb++ = b1 >> 8;
                     *pb++ = g1 >> 8;
                     *pb++ = r1 >> 8;
                     *pb++ = a1 >> 8;
+
+                    /* add delta's values */
                     b1 += db;
                     g1 += dg;
                     r1 += dr;
@@ -456,10 +558,12 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 }
             }
         }
+        /* the lower triangle (w/o dithering) */
         for (y1 = v2->y; y1 < v3->y; y1++)
         {
             if (v2->x < v3->x)
             {
+                /* calculate the edge values */
                 x1 = v2->x + (v3->x - v2->x) * (y1 - v2->y) / (v3->y - v2->y);
                 r1 = (COLOR16)(v2->Red   + (v3->Red   - v2->Red)   * (y1 - v2->y) / (v3->y - v2->y));
                 g1 = (COLOR16)(v2->Green + (v3->Green - v2->Green) * (y1 - v2->y) / (v3->y - v2->y));
@@ -470,6 +574,8 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 g2 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
                 b2 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
                 a2 = (COLOR16)(v1->Alpha + (v3->Alpha - v1->Alpha) * (y1 - v1->y) / (v3->y - v1->y));
+
+                /* add delta's values */
                 dx = x2 - x1;
                 if (dx != 0)
                 {
@@ -478,13 +584,19 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     dr = (r2 - r1) / dx;
                     da = (a2 - a1) / dx;
                 }
+
+                /* calculate the first position */
                 pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
+
+                /* do rendering */
                 for ( ; x1 < x2; x1++)
                 {
                     *pb++ = b1 >> 8;
                     *pb++ = g1 >> 8;
                     *pb++ = r1 >> 8;
                     *pb++ = a1 >> 8;
+
+                    /* add delta's values */
                     b1 += db;
                     g1 += dg;
                     r1 += dr;
@@ -493,6 +605,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             }
             else
             {
+                /* calculate the edge values */
                 x1 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
                 r1 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
                 g1 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
@@ -503,6 +616,8 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 g2 = (COLOR16)(v2->Green + (v3->Green - v2->Green) * (y1 - v2->y) / (v3->y - v2->y));
                 b2 = (COLOR16)(v2->Blue  + (v3->Blue  - v2->Blue)  * (y1 - v2->y) / (v3->y - v2->y));
                 a2 = (COLOR16)(v2->Alpha + (v3->Alpha - v2->Alpha) * (y1 - v2->y) / (v3->y - v2->y));
+
+                /* calculate delta's */
                 dx = x2 - x1;
                 if (dx != 0)
                 {
@@ -511,13 +626,19 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     dr = (r2 - r1) / dx;
                     da = (a2 - a1) / dx;
                 }
+
+                /* calculate the first position */
                 pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
+
+                /* do rendering */
                 for ( ; x1 < x2; x1++)
                 {
                     *pb++ = b1 >> 8;
                     *pb++ = g1 >> 8;
                     *pb++ = r1 >> 8;
                     *pb++ = a1 >> 8;
+
+                    /* add delta's values */
                     b1 += db;
                     g1 += dg;
                     r1 += dr;
@@ -543,16 +664,19 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     ULONG i;
     GRADIENT_RECT *rect;
 
+    /* get the extent */
     GetXYMinMax(&xyminmax, pTriVertex, dwNumVertex);
     xMin = xyminmax.xMin;
     yMin = xyminmax.yMin;
     xMax = xyminmax.xMax;
     yMax = xyminmax.yMax;
 
-    hMemDC = CreateCompatibleDC(hDC);
+    /* create a memory DC */
+    hMemDC = CreateCompatibleDC(NULL);
     if (hMemDC == NULL)
         return FALSE;
 
+    /* create a 32-bpp DIB section */
     cx = xMax - xMin;
     cy = yMax - yMin;
     bmi.bmiHeader.biWidth = cx;
@@ -566,6 +690,7 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         return FALSE;
     }
 
+    /* will we do dithering? */
     if (GetDeviceCaps(hDC, BITSPIXEL) < 24)
     {
         bDither = TRUE;
@@ -577,13 +702,18 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         bDither = (hbm && GetObject(hbm, sizeof(BITMAP), &bm) && bm.bmBitsPixel < 24);
     }
 
+    /* transfer to hMemDC */
     hbmMemOld = SelectObject(hMemDC, hbmMem);
     BitBlt(hMemDC, 0, 0, cx, cy, hDC, xMin, yMin, SRCCOPY);
     SelectObject(hMemDC, hbmMemOld);
 
+    /* select hbmMem */
     hbmMemOld = SelectObject(hMemDC, hbmMem);
+
+    /* do main process */
     if (bVertical)
     {
+        /* vertical */
         for (i = 0; i < dwNumMesh; ++i)
         {
             rect = (GRADIENT_RECT *)pMesh + i;
@@ -592,18 +722,25 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     }
     else
     {
+        /* horizontal */
         for (i = 0; i < dwNumMesh; ++i)
         {
             rect = (GRADIENT_RECT *)pMesh + i;
             MeshFillRectH(pbBits, cx, cy, pTriVertex, rect, xMin, yMin, bDither);
         }
     }
+
+    /* transfer to hDC */
     SetDIBitsToDevice(hDC, xMin, yMin, cx, cy, 0, 0, 0, cy, pbBits, &bmi, DIB_RGB_COLORS);
+
+    /* deselect hbmMem */
     SelectObject(hMemDC, hbmMemOld);
 
+    /* clean up */
     DeleteObject(hbmMem);
     DeleteDC(hMemDC);
-    return TRUE;
+
+    return TRUE;    /* success */
 }
 
 static BOOL WINAPI
@@ -620,20 +757,23 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     LPBYTE pbBits;
     ULONG i;
     GRADIENT_TRIANGLE *triangle;
-	const TRIVERTEX *v1;
-	const TRIVERTEX *v2;
-	const TRIVERTEX *v3;
+    const TRIVERTEX *v1;
+    const TRIVERTEX *v2;
+    const TRIVERTEX *v3;
 
+    /* get the extent */
     GetXYMinMax(&xyminmax, pTriVertex, dwNumVertex);
     xMin = xyminmax.xMin;
     yMin = xyminmax.yMin;
     xMax = xyminmax.xMax;
     yMax = xyminmax.yMax;
 
-    hMemDC = CreateCompatibleDC(hDC);
+    /* create a memory DC */
+    hMemDC = CreateCompatibleDC(NULL);
     if (hMemDC == NULL)
         return FALSE;
 
+    /* create a 32-bpp DIB section */
     cx = xMax - xMin;
     cy = yMax - yMin;
     bmi.bmiHeader.biWidth = cx;
@@ -647,6 +787,7 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         return FALSE;
     }
 
+    /* will we do dithering? */
     if (GetDeviceCaps(hDC, BITSPIXEL) < 24)
     {
         bDither = TRUE;
@@ -658,17 +799,23 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         bDither = (hbm && GetObject(hbm, sizeof(BITMAP), &bm) && bm.bmBitsPixel < 24);
     }
 
+    /* transfer to hMemDC */
     hbmMemOld = SelectObject(hMemDC, hbmMem);
     BitBlt(hMemDC, 0, 0, cx, cy, hDC, xMin, yMin, SRCCOPY);
     SelectObject(hMemDC, hbmMemOld);
 
+    /* select hbmMem */
     hbmMemOld = SelectObject(hMemDC, hbmMem);
+
+    /* do main process */
     for (i = 0; i < dwNumMesh; ++i)
     {
         triangle = (GRADIENT_TRIANGLE *)pMesh + i;
         v1 = pTriVertex + triangle->Vertex1;
         v2 = pTriVertex + triangle->Vertex2;
         v3 = pTriVertex + triangle->Vertex3;
+
+        /* sort v1, v2, v3 */
         if (v1->y > v2->y)
         {
             const TRIVERTEX *tmp = v1;
@@ -688,14 +835,21 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
             }
         }
         assert(v1->y <= v2->y && v2->y <= v3->y);
+
         MeshFillTriangle(pbBits, cx, cy, v1, v2, v3, triangle, xMin, yMin, bDither);
     }
+
+    /* transfer to hDC */
     SetDIBitsToDevice(hDC, xMin, yMin, cx, cy, 0, 0, 0, cy, pbBits, &bmi, DIB_RGB_COLORS);
+
+    /* deselect hbmMem */
     SelectObject(hMemDC, hbmMemOld);
 
+    /* clean up */
     DeleteObject(hbmMem);
     DeleteDC(hMemDC);
-    return TRUE;
+
+    return TRUE;    /* success */
 }
 
 #ifdef __cplusplus
@@ -706,7 +860,7 @@ WonGradientFill(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
                 VOID *pMesh, ULONG dwNumMesh, ULONG dwMode)
 {
     if (dwNumVertex == 0 || dwNumMesh == 0)
-        return FALSE;
+        return FALSE;   /* nothing to do */
 
     switch (dwMode)
     {
@@ -717,6 +871,6 @@ WonGradientFill(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     case GRADIENT_FILL_TRIANGLE:
         return GFillTriangle(hDC, pTriVertex, dwNumVertex, pMesh, dwNumMesh);
     default:
-        return FALSE;
+        return FALSE;   /* invalid parameter */
     }
 }
