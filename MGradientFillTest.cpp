@@ -1,4 +1,5 @@
-// MyNotepad.cpp --- A Win32 application                -*- C++ -*-
+// MGradientFillTest.cpp --- Sample of WonGradientFill and GradientFill
+// Copyright (C) 2017 Katayama Hirofumi MZ. License: CC0
 //////////////////////////////////////////////////////////////////////////////
 
 #include "MWindowBase.hpp"
