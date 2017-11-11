@@ -3,10 +3,12 @@
 #include <windows.h>
 #include <assert.h>
 
-#ifdef __cplusplus
-#define INLINE inline
-#else
-#define INLINE __inline
+#ifndef INLINE
+    #ifdef __cplusplus
+        #define INLINE inline
+    #else
+        #define INLINE __inline
+    #endif
 #endif
 
 /* https://en.wikipedia.org/wiki/Ordered_dithering */
