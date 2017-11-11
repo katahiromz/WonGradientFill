@@ -1,5 +1,5 @@
-// WonGradientFill.c --- GradientFill API clone by katahiromz
-// Copyright (C) 2017 Katayama Hirofumi MZ.
+/* WonGradientFill.c --- GradientFill API clone by katahiromz */
+/* Copyright (C) 2017 Katayama Hirofumi MZ. */
 #include <windows.h>
 #include <assert.h>
 
