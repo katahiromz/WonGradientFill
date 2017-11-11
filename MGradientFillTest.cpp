@@ -38,7 +38,7 @@ struct MGradientFillTest : public MWindowBase
 
     // constructors
     MGradientFillTest(HINSTANCE hInst)
-        : m_hInst(hInst), m_nMode(0), m_hbm(NULL), m_bUseMSIMG32(FALSE)
+        : m_hInst(hInst), m_nMode(1), m_hbm(NULL), m_bUseMSIMG32(FALSE)
     {
     }
 
@@ -52,7 +52,7 @@ struct MGradientFillTest : public MWindowBase
         return TRUE;
     }
 
-    void ReCreateBitmap(HWND hwnd)
+    void ReCreateBitmap(HWND hwnd, BOOL bIncrement = FALSE)
     {
         if (m_hbm)
         {
@@ -65,7 +65,10 @@ struct MGradientFillTest : public MWindowBase
         bmi.bmiHeader.biHeight = m_siz.cy;
         bmi.bmiHeader.biPlanes = 1;
 
-        m_nMode = (m_nMode + 1) % 3;
+        if (bIncrement)
+        {
+            m_nMode = (m_nMode + 1) % 3;
+        }
         switch (m_nMode)
         {
         case 0:
@@ -106,7 +109,7 @@ struct MGradientFillTest : public MWindowBase
 
     void OnLButtonDown(HWND hwnd, BOOL fDoubleClick, int x, int y, UINT keyFlags)
     {
-        ReCreateBitmap(hwnd);
+        ReCreateBitmap(hwnd, TRUE);
     }
 
     void OnRButtonDown(HWND hwnd, BOOL fDoubleClick, int x, int y, UINT keyFlags)
@@ -119,7 +122,7 @@ struct MGradientFillTest : public MWindowBase
         RECT rc;
         ::GetClientRect(hwnd, &rc);
         m_siz = SizeFromRectDx(&rc);
-        ReCreateBitmap(hwnd);
+        ReCreateBitmap(hwnd, FALSE);
         SetTimer(hwnd, 999, INTERVAL, NULL);
         return TRUE;
     }
@@ -238,7 +241,8 @@ struct MGradientFillTest : public MWindowBase
 
     BOOL StartDx(INT nCmdShow)
     {
-        if (!CreateWindowDx(NULL, LoadStringDx(1)))
+        if (!CreateWindowDx(NULL, TEXT("MGradientFillTest"), WS_OVERLAPPEDWINDOW, 0,
+                            CW_USEDEFAULT, CW_USEDEFAULT, 300, 300))
         {
             ErrorBoxDx(TEXT("failure of CreateWindow"));
             return FALSE;
@@ -272,7 +276,7 @@ struct MGradientFillTest : public MWindowBase
         RECT rc;
         ::GetClientRect(hwnd, &rc);
         m_siz = SizeFromRectDx(&rc);
-        ReCreateBitmap(hwnd);
+        ReCreateBitmap(hwnd, FALSE);
     }
 };
 
