@@ -20,6 +20,7 @@ typedef struct BITMAPINFODX
     RGBQUAD bmiColors[256];
 } BITMAPINFODX;
 
+extern "C"
 BOOL WINAPI
 WonGradientFill(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
                 VOID *pMesh, ULONG dwNumMesh, ULONG dwMode);
@@ -211,7 +212,9 @@ struct MGradientFillTest : public MWindowBase
 
     void OnTimer(HWND hwnd, UINT id)
     {
+        KillTimer(hwnd, 999);
         InvalidateRect(hwnd, NULL, TRUE);
+        SetTimer(hwnd, 999, INTERVAL, NULL);
     }
 
     virtual LRESULT CALLBACK

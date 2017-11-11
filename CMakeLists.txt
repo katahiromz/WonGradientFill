@@ -8,6 +8,7 @@ cmake_minimum_required(VERSION 2.4)
 
 # project name and language
 project(MGradientFillTest CXX)
+enable_language(C)
 
 # check build type
 if (NOT CMAKE_BUILD_TYPE)
@@ -44,7 +45,7 @@ if (CMAKE_HOST_WIN32)
     ENABLE_LANGUAGE(RC)
 
     # Win32
-    add_executable(MGradientFillTest WIN32 MGradientFillTest.cpp WonGradientFill.cpp)
+    add_executable(MGradientFillTest WIN32 MGradientFillTest.cpp WonGradientFill.c)
 else()
     message(FATAL_ERROR "To build this project, use Win32 C++ compiler")
 endif()
@@ -64,10 +65,10 @@ SET(BUILD_SHARED_LIBRARIES OFF)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     # using Clang
-    SET(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++")
+    set(CMAKE_EXE_LINKER_FLAGS "-static")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # using GCC
-    SET(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++")
+    set(CMAKE_EXE_LINKER_FLAGS "-static")
 endif()
 
 # replace "/MD" with "/MT" (building without runtime DLLs)

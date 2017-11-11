@@ -1,4 +1,4 @@
-// WonGradientFill.cpp --- GradientFill API clone by katahiromz
+// WonGradientFill.c --- GradientFill API clone by katahiromz
 // Copyright (C) 2017 Katayama Hirofumi MZ.
 #include <windows.h>
 #include <assert.h>
@@ -259,13 +259,13 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             if (v2->x < v3->x)
             {
                 x1 = v1->x + (v2->x - v1->x) * (y1 - v1->y) / (v2->y - v1->y);
-                r1 = COLOR16(v1->Red   + (v2->Red   - v1->Red)   * (y1 - v1->y) / (v2->y - v1->y));
-                g1 = COLOR16(v1->Green + (v2->Green - v1->Green) * (y1 - v1->y) / (v2->y - v1->y));
-                b1 = COLOR16(v1->Blue  + (v2->Blue  - v1->Blue)  * (y1 - v1->y) / (v2->y - v1->y));
+                r1 = (COLOR16)(v1->Red   + (v2->Red   - v1->Red)   * (y1 - v1->y) / (v2->y - v1->y));
+                g1 = (COLOR16)(v1->Green + (v2->Green - v1->Green) * (y1 - v1->y) / (v2->y - v1->y));
+                b1 = (COLOR16)(v1->Blue  + (v2->Blue  - v1->Blue)  * (y1 - v1->y) / (v2->y - v1->y));
                 x2 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
-                r2 = COLOR16(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
-                g2 = COLOR16(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
-                b2 = COLOR16(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
+                r2 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
+                g2 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
+                b2 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
                 dx = x2 - x1;
                 if (dx != 0)
                 {
@@ -288,13 +288,13 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             else
             {
                 x1 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
-                r1 = COLOR16(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
-                g1 = COLOR16(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
-                b1 = COLOR16(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
+                r1 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
+                g1 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
+                b1 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
                 x2 = v1->x + (v2->x - v1->x) * (y1 - v1->y) / (v2->y - v1->y);
-                r2 = COLOR16(v1->Red   + (v2->Red   - v1->Red)   * (y1 - v1->y) / (v2->y - v1->y));
-                g2 = COLOR16(v1->Green + (v2->Green - v1->Green) * (y1 - v1->y) / (v2->y - v1->y));
-                b2 = COLOR16(v1->Blue  + (v2->Blue  - v1->Blue)  * (y1 - v1->y) / (v2->y - v1->y));
+                r2 = (COLOR16)(v1->Red   + (v2->Red   - v1->Red)   * (y1 - v1->y) / (v2->y - v1->y));
+                g2 = (COLOR16)(v1->Green + (v2->Green - v1->Green) * (y1 - v1->y) / (v2->y - v1->y));
+                b2 = (COLOR16)(v1->Blue  + (v2->Blue  - v1->Blue)  * (y1 - v1->y) / (v2->y - v1->y));
                 dx = x2 - x1;
                 if (dx != 0)
                 {
@@ -320,13 +320,13 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             if (v2->x < v3->x)
             {
                 x1 = v2->x + (v3->x - v2->x) * (y1 - v2->y) / (v3->y - v2->y);
-                r1 = COLOR16(v2->Red   + (v3->Red   - v2->Red)   * (y1 - v2->y) / (v3->y - v2->y));
-                g1 = COLOR16(v2->Green + (v3->Green - v2->Green) * (y1 - v2->y) / (v3->y - v2->y));
-                b1 = COLOR16(v2->Blue  + (v3->Blue  - v2->Blue)  * (y1 - v2->y) / (v3->y - v2->y));
+                r1 = (COLOR16)(v2->Red   + (v3->Red   - v2->Red)   * (y1 - v2->y) / (v3->y - v2->y));
+                g1 = (COLOR16)(v2->Green + (v3->Green - v2->Green) * (y1 - v2->y) / (v3->y - v2->y));
+                b1 = (COLOR16)(v2->Blue  + (v3->Blue  - v2->Blue)  * (y1 - v2->y) / (v3->y - v2->y));
                 x2 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
-                r2 = COLOR16(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
-                g2 = COLOR16(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
-                b2 = COLOR16(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
+                r2 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
+                g2 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
+                b2 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
                 dx = x2 - x1;
                 if (dx != 0)
                 {
@@ -349,13 +349,13 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             else
             {
                 x1 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
-                r1 = COLOR16(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
-                g1 = COLOR16(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
-                b1 = COLOR16(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
+                r1 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
+                g1 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
+                b1 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
                 x2 = v2->x + (v3->x - v2->x) * (y1 - v2->y) / (v3->y - v2->y);
-                r2 = COLOR16(v2->Red   + (v3->Red   - v2->Red)   * (y1 - v2->y) / (v3->y - v2->y));
-                g2 = COLOR16(v2->Green + (v3->Green - v2->Green) * (y1 - v2->y) / (v3->y - v2->y));
-                b2 = COLOR16(v2->Blue  + (v3->Blue  - v2->Blue)  * (y1 - v2->y) / (v3->y - v2->y));
+                r2 = (COLOR16)(v2->Red   + (v3->Red   - v2->Red)   * (y1 - v2->y) / (v3->y - v2->y));
+                g2 = (COLOR16)(v2->Green + (v3->Green - v2->Green) * (y1 - v2->y) / (v3->y - v2->y));
+                b2 = (COLOR16)(v2->Blue  + (v3->Blue  - v2->Blue)  * (y1 - v2->y) / (v3->y - v2->y));
                 dx = x2 - x1;
                 if (dx != 0)
                 {
@@ -384,15 +384,15 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             if (v2->x < v3->x)
             {
                 x1 = v1->x + (v2->x - v1->x) * (y1 - v1->y) / (v2->y - v1->y);
-                r1 = COLOR16(v1->Red   + (v2->Red   - v1->Red)   * (y1 - v1->y) / (v2->y - v1->y));
-                g1 = COLOR16(v1->Green + (v2->Green - v1->Green) * (y1 - v1->y) / (v2->y - v1->y));
-                b1 = COLOR16(v1->Blue  + (v2->Blue  - v1->Blue)  * (y1 - v1->y) / (v2->y - v1->y));
-                a1 = COLOR16(v1->Alpha + (v2->Alpha - v1->Alpha) * (y1 - v1->y) / (v2->y - v1->y));
+                r1 = (COLOR16)(v1->Red   + (v2->Red   - v1->Red)   * (y1 - v1->y) / (v2->y - v1->y));
+                g1 = (COLOR16)(v1->Green + (v2->Green - v1->Green) * (y1 - v1->y) / (v2->y - v1->y));
+                b1 = (COLOR16)(v1->Blue  + (v2->Blue  - v1->Blue)  * (y1 - v1->y) / (v2->y - v1->y));
+                a1 = (COLOR16)(v1->Alpha + (v2->Alpha - v1->Alpha) * (y1 - v1->y) / (v2->y - v1->y));
                 x2 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
-                r2 = COLOR16(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
-                g2 = COLOR16(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
-                b2 = COLOR16(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
-                a2 = COLOR16(v1->Alpha + (v3->Alpha - v1->Alpha) * (y1 - v1->y) / (v3->y - v1->y));
+                r2 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
+                g2 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
+                b2 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
+                a2 = (COLOR16)(v1->Alpha + (v3->Alpha - v1->Alpha) * (y1 - v1->y) / (v3->y - v1->y));
                 dx = x2 - x1;
                 if (dx != 0)
                 {
@@ -417,15 +417,15 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             else
             {
                 x1 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
-                r1 = COLOR16(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
-                g1 = COLOR16(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
-                b1 = COLOR16(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
-                a1 = COLOR16(v1->Alpha + (v3->Alpha - v1->Alpha) * (y1 - v1->y) / (v3->y - v1->y));
+                r1 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
+                g1 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
+                b1 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
+                a1 = (COLOR16)(v1->Alpha + (v3->Alpha - v1->Alpha) * (y1 - v1->y) / (v3->y - v1->y));
                 x2 = v1->x + (v2->x - v1->x) * (y1 - v1->y) / (v2->y - v1->y);
-                r2 = COLOR16(v1->Red   + (v2->Red   - v1->Red)   * (y1 - v1->y) / (v2->y - v1->y));
-                g2 = COLOR16(v1->Green + (v2->Green - v1->Green) * (y1 - v1->y) / (v2->y - v1->y));
-                b2 = COLOR16(v1->Blue  + (v2->Blue  - v1->Blue)  * (y1 - v1->y) / (v2->y - v1->y));
-                a2 = COLOR16(v1->Alpha + (v2->Alpha - v1->Alpha) * (y1 - v1->y) / (v2->y - v1->y));
+                r2 = (COLOR16)(v1->Red   + (v2->Red   - v1->Red)   * (y1 - v1->y) / (v2->y - v1->y));
+                g2 = (COLOR16)(v1->Green + (v2->Green - v1->Green) * (y1 - v1->y) / (v2->y - v1->y));
+                b2 = (COLOR16)(v1->Blue  + (v2->Blue  - v1->Blue)  * (y1 - v1->y) / (v2->y - v1->y));
+                a2 = (COLOR16)(v1->Alpha + (v2->Alpha - v1->Alpha) * (y1 - v1->y) / (v2->y - v1->y));
                 dx = x2 - x1;
                 if (dx != 0)
                 {
@@ -453,15 +453,15 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             if (v2->x < v3->x)
             {
                 x1 = v2->x + (v3->x - v2->x) * (y1 - v2->y) / (v3->y - v2->y);
-                r1 = COLOR16(v2->Red   + (v3->Red   - v2->Red)   * (y1 - v2->y) / (v3->y - v2->y));
-                g1 = COLOR16(v2->Green + (v3->Green - v2->Green) * (y1 - v2->y) / (v3->y - v2->y));
-                b1 = COLOR16(v2->Blue  + (v3->Blue  - v2->Blue)  * (y1 - v2->y) / (v3->y - v2->y));
-                a1 = COLOR16(v2->Alpha + (v3->Alpha - v2->Alpha) * (y1 - v2->y) / (v3->y - v2->y));
+                r1 = (COLOR16)(v2->Red   + (v3->Red   - v2->Red)   * (y1 - v2->y) / (v3->y - v2->y));
+                g1 = (COLOR16)(v2->Green + (v3->Green - v2->Green) * (y1 - v2->y) / (v3->y - v2->y));
+                b1 = (COLOR16)(v2->Blue  + (v3->Blue  - v2->Blue)  * (y1 - v2->y) / (v3->y - v2->y));
+                a1 = (COLOR16)(v2->Alpha + (v3->Alpha - v2->Alpha) * (y1 - v2->y) / (v3->y - v2->y));
                 x2 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
-                r2 = COLOR16(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
-                g2 = COLOR16(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
-                b2 = COLOR16(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
-                a2 = COLOR16(v1->Alpha + (v3->Alpha - v1->Alpha) * (y1 - v1->y) / (v3->y - v1->y));
+                r2 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
+                g2 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
+                b2 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
+                a2 = (COLOR16)(v1->Alpha + (v3->Alpha - v1->Alpha) * (y1 - v1->y) / (v3->y - v1->y));
                 dx = x2 - x1;
                 if (dx != 0)
                 {
@@ -486,15 +486,15 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             else
             {
                 x1 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
-                r1 = COLOR16(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
-                g1 = COLOR16(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
-                b1 = COLOR16(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
-                a1 = COLOR16(v1->Alpha + (v3->Alpha - v1->Alpha) * (y1 - v1->y) / (v3->y - v1->y));
+                r1 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
+                g1 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
+                b1 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
+                a1 = (COLOR16)(v1->Alpha + (v3->Alpha - v1->Alpha) * (y1 - v1->y) / (v3->y - v1->y));
                 x2 = v2->x + (v3->x - v2->x) * (y1 - v2->y) / (v3->y - v2->y);
-                r2 = COLOR16(v2->Red   + (v3->Red   - v2->Red)   * (y1 - v2->y) / (v3->y - v2->y));
-                g2 = COLOR16(v2->Green + (v3->Green - v2->Green) * (y1 - v2->y) / (v3->y - v2->y));
-                b2 = COLOR16(v2->Blue  + (v3->Blue  - v2->Blue)  * (y1 - v2->y) / (v3->y - v2->y));
-                a2 = COLOR16(v2->Alpha + (v3->Alpha - v2->Alpha) * (y1 - v2->y) / (v3->y - v2->y));
+                r2 = (COLOR16)(v2->Red   + (v3->Red   - v2->Red)   * (y1 - v2->y) / (v3->y - v2->y));
+                g2 = (COLOR16)(v2->Green + (v3->Green - v2->Green) * (y1 - v2->y) / (v3->y - v2->y));
+                b2 = (COLOR16)(v2->Blue  + (v3->Blue  - v2->Blue)  * (y1 - v2->y) / (v3->y - v2->y));
+                a2 = (COLOR16)(v2->Alpha + (v3->Alpha - v2->Alpha) * (y1 - v2->y) / (v3->y - v2->y));
                 dx = x2 - x1;
                 if (dx != 0)
                 {
@@ -687,6 +687,9 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     return TRUE;
 }
 
+#ifdef __cplusplus
+extern "C"
+#endif
 BOOL WINAPI
 WonGradientFill(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
                 VOID *pMesh, ULONG dwNumMesh, ULONG dwMode)
