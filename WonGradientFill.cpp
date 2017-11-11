@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <assert.h>
 
+// https://en.wikipedia.org/wiki/Ordered_dithering
 static inline BYTE BayerDithering(ULONG x, ULONG y, BYTE b)
 {
 #if 1
