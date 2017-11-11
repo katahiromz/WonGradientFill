@@ -3,8 +3,14 @@
 #include <windows.h>
 #include <assert.h>
 
-// https://en.wikipedia.org/wiki/Ordered_dithering
-static inline BYTE BayerDithering(ULONG x, ULONG y, BYTE b)
+#ifdef __cplusplus
+#define INLINE inline
+#else
+#define INLINE __inline
+#endif
+
+/* https://en.wikipedia.org/wiki/Ordered_dithering */
+static INLINE BYTE BayerDithering(ULONG x, ULONG y, BYTE b)
 {
 #if 1
     #define BV(x) (x * 255 / 64)
@@ -39,7 +45,7 @@ typedef struct XYMINMAX
     LONG xMin, yMin, xMax, yMax;
 } XYMINMAX;
 
-static inline void
+static INLINE void
 GetXYMinMax(XYMINMAX *pXYMinMax, TRIVERTEX *pTriVertex, ULONG dwNumVertex)
 {
     ULONG i;
@@ -68,7 +74,7 @@ GetXYMinMax(XYMINMAX *pXYMinMax, TRIVERTEX *pTriVertex, ULONG dwNumVertex)
     pXYMinMax->yMax = yMax;
 }
 
-static inline void WINAPI
+static void WINAPI
 MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
               const GRADIENT_RECT *rect, INT xMin, INT yMin, BOOL bDither)
 {
@@ -153,7 +159,7 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
     }
 }
 
-static inline void WINAPI
+static void WINAPI
 MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
               const GRADIENT_RECT *rect, INT xMin, INT yMin, BOOL bDither)
 {
@@ -238,7 +244,7 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
     }
 }
 
-static inline void WINAPI
+static void WINAPI
 MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                  const TRIVERTEX *v1,
                  const TRIVERTEX *v2,
@@ -612,6 +618,9 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     LPBYTE pbBits;
     ULONG i;
     GRADIENT_TRIANGLE *triangle;
+	const TRIVERTEX *v1;
+	const TRIVERTEX *v2;
+	const TRIVERTEX *v3;
 
     GetXYMinMax(&xyminmax, pTriVertex, dwNumVertex);
     xMin = xyminmax.xMin;
@@ -655,9 +664,9 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     for (i = 0; i < dwNumMesh; ++i)
     {
         triangle = (GRADIENT_TRIANGLE *)pMesh + i;
-        const TRIVERTEX *v1 = pTriVertex + triangle->Vertex1;
-        const TRIVERTEX *v2 = pTriVertex + triangle->Vertex2;
-        const TRIVERTEX *v3 = pTriVertex + triangle->Vertex3;
+        v1 = pTriVertex + triangle->Vertex1;
+        v2 = pTriVertex + triangle->Vertex2;
+        v3 = pTriVertex + triangle->Vertex3;
         if (v1->y > v2->y)
         {
             const TRIVERTEX *tmp = v1;
