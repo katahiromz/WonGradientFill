@@ -30,6 +30,7 @@ static inline BYTE BayerDithering(ULONG x, ULONG y, BYTE b)
     };
     return ((s_bayer_16[(y & 3) * 4 + (x & 3)] <= b) ? 255 : 0);
 #endif
+#undef BV
 }
 
 typedef struct XYMINMAX
