@@ -272,6 +272,7 @@ struct MGradientFillTest : public MWindowBase
         RECT rc;
         ::GetClientRect(hwnd, &rc);
         m_siz = SizeFromRectDx(&rc);
+        ReCreateBitmap(hwnd);
     }
 };
 
