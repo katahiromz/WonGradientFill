@@ -401,7 +401,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
     }
 
 static BOOL WINAPI
-GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
+IntGradFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
           VOID *pMesh, ULONG dwNumMesh, BOOL bVertical)
 {
     LONG x, y, xMin, yMin, xMax, yMax, cx, cy;
@@ -469,7 +469,7 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
 }
 
 static BOOL WINAPI
-GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
+IntGradFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
               VOID *pMesh, ULONG dwNumMesh)
 {
     LONG x, y, xMin, yMin, xMax, yMax, cx, cy;
@@ -557,11 +557,11 @@ WonGradientFill(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     switch (dwMode)
     {
     case GRADIENT_FILL_RECT_H:
-        return GFillRect(hDC, pTriVertex, dwNumVertex, pMesh, dwNumMesh, FALSE);
+        return IntGradFillRect(hDC, pTriVertex, dwNumVertex, pMesh, dwNumMesh, FALSE);
     case GRADIENT_FILL_RECT_V:
-        return GFillRect(hDC, pTriVertex, dwNumVertex, pMesh, dwNumMesh, TRUE);
+        return IntGradFillRect(hDC, pTriVertex, dwNumVertex, pMesh, dwNumMesh, TRUE);
     case GRADIENT_FILL_TRIANGLE:
-        return GFillTriangle(hDC, pTriVertex, dwNumVertex, pMesh, dwNumMesh);
+        return IntGradFillTriangle(hDC, pTriVertex, dwNumVertex, pMesh, dwNumMesh);
     default:
         return FALSE;   /* invalid parameter */
     }
