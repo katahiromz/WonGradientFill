@@ -307,39 +307,33 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
         DO_P(); \
         ADD_D(); \
     }
+#define DO_LINE2(a1,a2,a3,a4,DO_P,ADD_D,CALC_E,CALC_D) \
+    CALC_E(a1, a2, a3, a4); \
+    CALC_D(); \
+    pb = &GET_BYTE(x1 - x0, y1 - y0); \
+    DO_LINE(DO_P, ADD_D);
+
 #define DO_RENDER(DO_P,ADD_D,CALC_E,CALC_D) \
     for (y1 = v1->y; y1 < v2->y; y1++) \
     { \
         if (v2->x < v3->x) \
         { \
-            CALC_E(v1, v2, v1, v3); \
-            CALC_D(); \
-            pb = &GET_BYTE(x1 - x0, y1 - y0); \
-            DO_LINE(DO_P, ADD_D); \
+            DO_LINE2(v1, v2, v1, v3, DO_P, ADD_D, CALC_E, CALC_D); \
         } \
         else \
         { \
-            CALC_E(v1, v3, v1, v2); \
-            CALC_D(); \
-            pb = &GET_BYTE(x1 - x0, y1 - y0); \
-            DO_LINE(DO_P, ADD_D); \
+            DO_LINE2(v1, v3, v1, v2, DO_P, ADD_D, CALC_E, CALC_D); \
         } \
     } \
     for (y1 = v2->y; y1 < v3->y; y1++) \
     { \
         if (v2->x < v3->x) \
         { \
-            CALC_E(v2, v3, v1, v3); \
-            CALC_D(); \
-            pb = &GET_BYTE(x1 - x0, y1 - y0); \
-            DO_LINE(DO_P, ADD_D); \
+            DO_LINE2(v2, v3, v1, v3, DO_P, ADD_D, CALC_E, CALC_D); \
         } \
         else \
         { \
-            CALC_E(v1, v3, v2, v3); \
-            CALC_D(); \
-            pb = &GET_BYTE(x1 - x0, y1 - y0); \
-            DO_LINE(DO_P, ADD_D); \
+            DO_LINE2(v1, v3, v2, v3, DO_P, ADD_D, CALC_E, CALC_D); \
         } \
     }
 
