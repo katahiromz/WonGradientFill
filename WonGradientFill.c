@@ -228,7 +228,7 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
     else
     {
         /* fill rectangle horizontally (w/o dithering) */
-        DO_RECT_H   (DO_PIXEL_ALPHA, ADD_DELTAS_ALPHA);
+        DO_RECT_H(DO_PIXEL_ALPHA, ADD_DELTAS_ALPHA);
     }
 }
 
@@ -323,6 +323,13 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
     b2 = (COLOR16)(w1->Blue  + (w2->Blue  - w1->Blue)  * (y1 - w1->y) / (w2->y - w1->y)); \
     a2 = (COLOR16)(w1->Alpha + (w2->Alpha - w1->Alpha) * (y1 - w1->y) / (w2->y - w1->y));
 
+#define DO_LINE(DO_P,ADD_D) \
+    for ( ; x1 < x2; ++x1) \
+    { \
+        DO_P(); \
+        ADD_D(); \
+    }
+
 static void WINAPI
 MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                  TRIVERTEX *v1, TRIVERTEX *v2, TRIVERTEX *v3,
@@ -356,13 +363,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                     /* do rendering */
-                    for ( ; x1 < x2; x1++)
-                    {
-                        DO_PIXEL_LOW();
-
-                        /* add delta's values */
-                        ADD_DELTAS();
-                    }
+                    DO_LINE(DO_PIXEL_LOW, ADD_DELTAS);
                 }
                 else
                 {
@@ -376,13 +377,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                     /* do rendering */
-                    for ( ; x1 < x2; x1++)
-                    {
-                        DO_PIXEL_LOW();
-
-                        /* add delta's values */
-                        ADD_DELTAS();
-                    }
+                    DO_LINE(DO_PIXEL_LOW, ADD_DELTAS);
                 }
             }
             /* the lower triangle (dithering) */
@@ -400,13 +395,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                     /* do rendering */
-                    for ( ; x1 < x2; x1++)
-                    {
-                        DO_PIXEL_LOW();
-
-                        /* add delta's values */
-                        ADD_DELTAS();
-                    }
+                    DO_LINE(DO_PIXEL_LOW, ADD_DELTAS);
                 }
                 else
                 {
@@ -420,13 +409,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                     /* do rendering */
-                    for ( ; x1 < x2; x1++)
-                    {
-                        DO_PIXEL_LOW();
-
-                        /* add delta's values */
-                        ADD_DELTAS();
-                    }
+                    DO_LINE(DO_PIXEL_LOW, ADD_DELTAS);
                 }
             }
         }
@@ -447,13 +430,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                     /* do rendering */
-                    for ( ; x1 < x2; x1++)
-                    {
-                        DO_PIXEL_HIGH();
-
-                        /* add delta's values */
-                        ADD_DELTAS();
-                    }
+                    DO_LINE(DO_PIXEL_HIGH, ADD_DELTAS);
                 }
                 else
                 {
@@ -467,13 +444,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                     /* do rendering */
-                    for ( ; x1 < x2; x1++)
-                    {
-                        DO_PIXEL_HIGH();
-
-                        /* add delta's values */
-                        ADD_DELTAS();
-                    }
+                    DO_LINE(DO_PIXEL_HIGH, ADD_DELTAS);
                 }
             }
             /* the lower triangle (dithering) */
@@ -491,13 +462,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                     /* do rendering */
-                    for ( ; x1 < x2; x1++)
-                    {
-                        DO_PIXEL_HIGH();
-
-                        /* add delta's values */
-                        ADD_DELTAS();
-                    }
+                    DO_LINE(DO_PIXEL_HIGH, ADD_DELTAS);
                 }
                 else
                 {
@@ -511,13 +476,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                     /* do rendering */
-                    for ( ; x1 < x2; x1++)
-                    {
-                        DO_PIXEL_HIGH();
-
-                        /* add delta's values */
-                        ADD_DELTAS();
-                    }
+                    DO_LINE(DO_PIXEL_HIGH, ADD_DELTAS);
                 }
             }
         }
@@ -539,13 +498,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                 /* do rendering */
-                for ( ; x1 < x2; x1++)
-                {
-                    DO_PIXEL_ALPHA();
-
-                    /* add delta's values */
-                    ADD_DELTAS_ALPHA();
-                }
+                DO_LINE(DO_PIXEL_ALPHA, ADD_DELTAS_ALPHA);
             }
             else
             {
@@ -559,13 +512,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                 /* do rendering */
-                for ( ; x1 < x2; x1++)
-                {
-                    DO_PIXEL_ALPHA();
-
-                    /* add delta's values */
-                    ADD_DELTAS_ALPHA();
-                }
+                DO_LINE(DO_PIXEL_ALPHA, ADD_DELTAS_ALPHA);
             }
         }
         /* the lower triangle (w/o dithering) */
@@ -583,13 +530,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                 /* do rendering */
-                for ( ; x1 < x2; x1++)
-                {
-                    DO_PIXEL_ALPHA();
-
-                    /* add delta's values */
-                    ADD_DELTAS_ALPHA();
-                }
+                DO_LINE(DO_PIXEL_ALPHA, ADD_DELTAS_ALPHA);
             }
             else
             {
@@ -603,13 +544,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                 /* do rendering */
-                for ( ; x1 < x2; x1++)
-                {
-                    DO_PIXEL_ALPHA();
-
-                    /* add delta's values */
-                    ADD_DELTAS_ALPHA();
-                }
+                DO_LINE(DO_PIXEL_ALPHA, ADD_DELTAS_ALPHA);
             }
         }
     }
