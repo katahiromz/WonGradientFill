@@ -154,11 +154,11 @@ static INLINE BYTE BayerDitheringHigh(ULONG x, ULONG y, BYTE b)
 
 static void WINAPI
 MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
-              GRADIENT_RECT *rect, INT xMin, INT yMin, BOOL bDither, BOOL bLow)
+              GRADIENT_RECT *rect, BOOL bDither, BOOL bLow)
 {
     COLOR16 r1, g1, b1, a1;
     COLOR16 dr, dg, db, da;
-    LONG dx, dy, x1, y1;
+    LONG dx, dy, x1, y1, x0, y0;
     ULONG stride;
     LPBYTE pb;
     TRIVERTEX *v1, *v2, *tmp;
@@ -173,6 +173,8 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
         v1 = tmp;
     }
     assert(v1->x <= v2->x);
+    x0 = v1->x;
+    y0 = ((v1->y < v2->y) ? v1->y : v2->y);
 
     r1 = v1->Red;
     g1 = v1->Green;
@@ -185,12 +187,12 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
     /* calculate the first position */
     if (dy < 0)
     {
-        pb = &GET_BYTE(v1->x - xMin, v2->y - yMin);
+        pb = &GET_BYTE(v1->x - x0, v2->y - y0);
         dy = -dy;
     }
     else
     {
-        pb = &GET_BYTE(v1->x - xMin, v1->y - yMin);
+        pb = &GET_BYTE(v1->x - x0, v1->y - y0);
     }
 
     stride = cx * 4;    /* one row width */
@@ -216,11 +218,11 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
 
 static void WINAPI
 MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
-              GRADIENT_RECT *rect, INT xMin, INT yMin, BOOL bDither, BOOL bLow)
+              GRADIENT_RECT *rect, BOOL bDither, BOOL bLow)
 {
     COLOR16 r1, g1, b1, a1;
     COLOR16 dr, dg, db, da;
-    LONG dx, dy, x1, y1;
+    LONG dx, dy, x1, y1, x0, y0;
     ULONG stride;
     LPBYTE pb;
     TRIVERTEX *v1, *v2, *tmp;
@@ -235,6 +237,8 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
         v1 = tmp;
     }
     assert(v1->y <= v2->y);
+    y0 = v1->y;
+    x0 = ((v1->x < v2->x) ? v1->x : v2->x);
 
     r1 = v1->Red;
     g1 = v1->Green;
@@ -247,12 +251,12 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
     /* calculate the first position */
     if (dx < 0)
     {
-        pb = &GET_BYTE(v2->x - xMin, v1->y - yMin);
+        pb = &GET_BYTE(v2->x - x0, v1->y - y0);
         dx = -dx;
     }
     else
     {
-        pb = &GET_BYTE(v1->x - xMin, v1->y - yMin);
+        pb = &GET_BYTE(v1->x - x0, v1->y - y0);
     }
 
     stride = cx * 4;    /* one row width */
@@ -310,14 +314,14 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
         { \
             CALC_E(v1, v2, v1, v3); \
             CALC_D(); \
-            pb = &GET_BYTE(x1 - xMin, y1 - yMin); \
+            pb = &GET_BYTE(x1 - x0, y1 - y0); \
             DO_LINE(DO_P, ADD_D); \
         } \
         else \
         { \
             CALC_E(v1, v3, v1, v2); \
             CALC_D(); \
-            pb = &GET_BYTE(x1 - xMin, y1 - yMin); \
+            pb = &GET_BYTE(x1 - x0, y1 - y0); \
             DO_LINE(DO_P, ADD_D); \
         } \
     } \
@@ -327,14 +331,14 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
         { \
             CALC_E(v2, v3, v1, v3); \
             CALC_D(); \
-            pb = &GET_BYTE(x1 - xMin, y1 - yMin); \
+            pb = &GET_BYTE(x1 - x0, y1 - y0); \
             DO_LINE(DO_P, ADD_D); \
         } \
         else \
         { \
             CALC_E(v1, v3, v2, v3); \
             CALC_D(); \
-            pb = &GET_BYTE(x1 - xMin, y1 - yMin); \
+            pb = &GET_BYTE(x1 - x0, y1 - y0); \
             DO_LINE(DO_P, ADD_D); \
         } \
     }
@@ -343,14 +347,21 @@ static void WINAPI
 MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                  TRIVERTEX *v1, TRIVERTEX *v2, TRIVERTEX *v3,
                  GRADIENT_TRIANGLE *triangle,
-                 INT xMin, INT yMin, BOOL bDither, BOOL bLow)
+                 BOOL bDither, BOOL bLow)
 {
     COLOR16 r1, g1, b1, a1, r2, g2, b2, a2;
     COLOR16 dr, dg, db, da;
-    LONG dx, x1, y1, x2;
+    LONG dx, x1, y1, x2, x0, y0;
     LPBYTE pb;
 
     assert(v1->y <= v2->y && v2->y <= v3->y);
+
+    y0 = v1->y;
+    x0 = v1->x;
+    if (x0 > v2->x)
+        x0 = v2->x;
+    if (x0 > v3->x)
+        x0 = v3->x;
 
     if (bDither)
     {
@@ -368,6 +379,18 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
         DO_RENDER(DO_PIXEL_ALPHA, ADD_DELTAS_ALPHA, CALC_EDGE_ALPHA, CALC_DELTAS_ALPHA);
     }
 }
+
+#define CREATE_MEM_BMP(cx,cy) \
+    bmi.bmiHeader.biWidth = cx; \
+    bmi.bmiHeader.biHeight = -cy; \
+    bmi.bmiHeader.biPlanes = 1; \
+    bmi.bmiHeader.biBitCount = 32; \
+    hbmMem = CreateDIBSection(hMemDC, &bmi, DIB_RGB_COLORS, (VOID **)&pbBits, NULL, 0); \
+    if (hbmMem == NULL) \
+    { \
+        DeleteDC(hMemDC); \
+        return FALSE; \
+    }
 
 static BOOL WINAPI
 GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
@@ -395,16 +418,7 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     /* create a 32-bpp DIB section */
     cx = xMax - xMin;
     cy = yMax - yMin;
-    bmi.bmiHeader.biWidth = cx;
-    bmi.bmiHeader.biHeight = -cy;
-    bmi.bmiHeader.biPlanes = 1;
-    bmi.bmiHeader.biBitCount = 32;
-    hbmMem = CreateDIBSection(hMemDC, &bmi, DIB_RGB_COLORS, (VOID **)&pbBits, NULL, 0);
-    if (hbmMem == NULL)
-    {
-        DeleteDC(hMemDC);
-        return FALSE;
-    }
+    CREATE_MEM_BMP(cx, cy);
 
     /* will we do dithering? */
     hbm = (HBITMAP)GetCurrentObject(hDC, OBJ_BITMAP);
@@ -433,7 +447,7 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         /* vertical */
         for (i = 0; i < dwNumMesh; ++i, ++rect)
         {
-            MeshFillRectV(pbBits, cx, cy, pTriVertex, rect, xMin, yMin, bDither, bLow);
+            MeshFillRectV(pbBits, cx, cy, pTriVertex, rect, bDither, bLow);
         }
     }
     else
@@ -441,7 +455,7 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         /* horizontal */
         for (i = 0; i < dwNumMesh; ++i, ++rect)
         {
-            MeshFillRectH(pbBits, cx, cy, pTriVertex, rect, xMin, yMin, bDither, bLow);
+            MeshFillRectH(pbBits, cx, cy, pTriVertex, rect, bDither, bLow);
         }
     }
 
@@ -485,16 +499,7 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     /* create a 32-bpp DIB section */
     cx = xMax - xMin;
     cy = yMax - yMin;
-    bmi.bmiHeader.biWidth = cx;
-    bmi.bmiHeader.biHeight = -cy;
-    bmi.bmiHeader.biPlanes = 1;
-    bmi.bmiHeader.biBitCount = 32;
-    hbmMem = CreateDIBSection(hMemDC, &bmi, DIB_RGB_COLORS, (VOID **)&pbBits, NULL, 0);
-    if (hbmMem == NULL)
-    {
-        DeleteDC(hMemDC);
-        return FALSE;
-    }
+    CREATE_MEM_BMP(cx, cy);
 
     /* will we do dithering? */
     hbm = (HBITMAP)GetCurrentObject(hDC, OBJ_BITMAP);
@@ -545,7 +550,7 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         }
         assert(v1->y <= v2->y && v2->y <= v3->y);
 
-        MeshFillTriangle(pbBits, cx, cy, v1, v2, v3, triangle, xMin, yMin, bDither, bLow);
+        MeshFillTriangle(pbBits, cx, cy, v1, v2, v3, triangle, bDither, bLow);
     }
 
     /* transfer to hDC */
