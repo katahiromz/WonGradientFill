@@ -210,6 +210,7 @@ struct MGradientFillTest : public MWindowBase
             EndPaint(hwnd, &ps);
         }
         SelectObject(hMemDC, hbmOld);
+        DeleteDC(hMemDC);
 
         ++s_i;
     }
