@@ -34,7 +34,21 @@ static INLINE BYTE BayerDithering(ULONG x, ULONG y, BYTE b)
         BV(10), BV(58), BV(6),  BV(54), BV(9),  BV(57), BV(5),  BV(53),
         BV(42), BV(26), BV(38), BV(22), BV(41), BV(25), BV(37), BV(21)
     };
-    return ((s_bayer_64[(y & 7) * 8 + (x & 7)] <= b) ? 255 : 0);
+    const BYTE value1 = s_bayer_64[(y & 7) * 8 + (x & 7)];
+    const BYTE value2 = s_bayer_64[(y & 7) * 8 + 7 ^ (x & 7)];
+    if (value1 <= b)
+    {
+        if (value2 <= b)
+            return 255;
+        return 127;
+    }
+    else
+    {
+        if (value2 <= b)
+            return 127;
+        return 0;
+    }
+    /* return ((s_bayer_64[(y & 7) * 8 + (x & 7)] <= b) ? 255 : 0); */
 #else
     #define BV(x) (x * 255 / 16)
     static const BYTE s_bayer_16[] =
