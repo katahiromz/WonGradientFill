@@ -110,6 +110,23 @@ GetXYMinMax(XYMINMAX *pXYMinMax, TRIVERTEX *pTriVertex, ULONG dwNumVertex)
     g1 += dg; \
     b1 += db; \
     a1 += da;
+#define CALC_DELTAS() \
+    dx = x2 - x1; \
+    if (dx != 0) \
+    { \
+        db = (b2 - b1) / dx; \
+        dg = (g2 - g1) / dx; \
+        dr = (r2 - r1) / dx; \
+    }
+#define CALC_DELTAS_ALPHA() \
+    dx = x2 - x1; \
+    if (dx != 0) \
+    { \
+        db = (b2 - b1) / dx; \
+        dg = (g2 - g1) / dx; \
+        dr = (r2 - r1) / dx; \
+        da = (a2 - a1) / dx; \
+    }
 
 static void WINAPI
 MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
@@ -337,13 +354,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 b2 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
 
                 /* calculate delta's */
-                dx = x2 - x1;
-                if (dx != 0)
-                {
-                    db = (b2 - b1) / dx;
-                    dg = (g2 - g1) / dx;
-                    dr = (r2 - r1) / dx;
-                }
+                CALC_DELTAS();
 
                 /* calculate the first position */
                 pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
@@ -373,13 +384,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 b2 = (COLOR16)(v1->Blue  + (v2->Blue  - v1->Blue)  * (y1 - v1->y) / (v2->y - v1->y));
 
                 /* calculate delta's */
-                dx = x2 - x1;
-                if (dx != 0)
-                {
-                    db = (b2 - b1) / dx;
-                    dg = (g2 - g1) / dx;
-                    dr = (r2 - r1) / dx;
-                }
+                CALC_DELTAS();
 
                 /* calculate the first position */
                 pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
@@ -413,13 +418,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 b2 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
 
                 /* calculate delta's */
-                dx = x2 - x1;
-                if (dx != 0)
-                {
-                    db = (b2 - b1) / dx;
-                    dg = (g2 - g1) / dx;
-                    dr = (r2 - r1) / dx;
-                }
+                CALC_DELTAS();
 
                 /* calculate the first position */
                 pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
@@ -449,13 +448,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 b2 = (COLOR16)(v2->Blue  + (v3->Blue  - v2->Blue)  * (y1 - v2->y) / (v3->y - v2->y));
 
                 /* calculate delta's */
-                dx = x2 - x1;
-                if (dx != 0)
-                {
-                    db = (b2 - b1) / dx;
-                    dg = (g2 - g1) / dx;
-                    dr = (r2 - r1) / dx;
-                }
+                CALC_DELTAS();
 
                 /* calculate the first position */
                 pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
@@ -494,14 +487,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 a2 = (COLOR16)(v1->Alpha + (v3->Alpha - v1->Alpha) * (y1 - v1->y) / (v3->y - v1->y));
 
                 /* calculate delta's */
-                dx = x2 - x1;
-                if (dx != 0)
-                {
-                    db = (b2 - b1) / dx;
-                    dg = (g2 - g1) / dx;
-                    dr = (r2 - r1) / dx;
-                    da = (a2 - a1) / dx;
-                }
+                CALC_DELTAS_ALPHA();
 
                 /* calculate the first position */
                 pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
@@ -533,14 +519,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 a2 = (COLOR16)(v1->Alpha + (v2->Alpha - v1->Alpha) * (y1 - v1->y) / (v2->y - v1->y));
 
                 /* calculate delta's */
-                dx = x2 - x1;
-                if (dx != 0)
-                {
-                    db = (b2 - b1) / dx;
-                    dg = (g2 - g1) / dx;
-                    dr = (r2 - r1) / dx;
-                    da = (a2 - a1) / dx;
-                }
+                CALC_DELTAS_ALPHA();
 
                 /* calculate the first position */
                 pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
@@ -576,14 +555,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 a2 = (COLOR16)(v1->Alpha + (v3->Alpha - v1->Alpha) * (y1 - v1->y) / (v3->y - v1->y));
 
                 /* add delta's values */
-                dx = x2 - x1;
-                if (dx != 0)
-                {
-                    db = (b2 - b1) / dx;
-                    dg = (g2 - g1) / dx;
-                    dr = (r2 - r1) / dx;
-                    da = (a2 - a1) / dx;
-                }
+                CALC_DELTAS_ALPHA();
 
                 /* calculate the first position */
                 pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
@@ -615,14 +587,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 a2 = (COLOR16)(v2->Alpha + (v3->Alpha - v2->Alpha) * (y1 - v2->y) / (v3->y - v2->y));
 
                 /* calculate delta's */
-                dx = x2 - x1;
-                if (dx != 0)
-                {
-                    db = (b2 - b1) / dx;
-                    dg = (g2 - g1) / dx;
-                    dr = (r2 - r1) / dx;
-                    da = (a2 - a1) / dx;
-                }
+                CALC_DELTAS_ALPHA();
 
                 /* calculate the first position */
                 pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
