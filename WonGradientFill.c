@@ -139,6 +139,29 @@ GetXYMinMax(XYMINMAX *pXYMinMax, TRIVERTEX *pTriVertex, ULONG dwNumVertex)
     *pb++ = r1 >> 8; \
     *pb++ = a1 >> 8;
 
+#define DO_RECT_H(DO_P,ADD_D) \
+    for (x1 = 0; x1 < dx; x1++) \
+    { \
+        for (y1 = 0; y1 < dy; y1++) \
+        { \
+            DO_P(); \
+            pb += stride - 4; \
+        } \
+        ADD_D(); \
+        pb -= dy * stride - 4; \
+    }
+#define DO_RECT_V(DO_P,ADD_D) \
+    for (y1 = 0; y1 < dy; y1++) \
+    { \
+        for (x1 = 0; x1 < dx; x1++) \
+        { \
+            DO_P(); \
+        } \
+        ADD_D(); \
+        pb -= dx * 4; \
+        pb += stride; \
+    }
+
 static void WINAPI
 MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
               GRADIENT_RECT *rect, INT xMin, INT yMin, BOOL bDither, BOOL bLow)
@@ -195,59 +218,17 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
         /* fill rectangle horizontally (dithering) */
         if (bLow)
         {
-            for (x1 = 0; x1 < dx; x1++)
-            {
-                /* render the column */
-                for (y1 = 0; y1 < dy; y1++)
-                {
-                    DO_PIXEL_LOW();
-
-                    pb += stride - 4;   /* next position */
-                }
-
-                /* add delta's values */
-                ADD_DELTAS();
-
-                pb -= dy * stride - 4;  /* next position */
-            }
+            DO_RECT_H(DO_PIXEL_LOW, ADD_DELTAS);
         }
         else
         {
-            for (x1 = 0; x1 < dx; x1++)
-            {
-                /* render the column */
-                for (y1 = 0; y1 < dy; y1++)
-                {
-                    DO_PIXEL_HIGH();
-
-                    pb += stride - 4;   /* next position */
-                }
-
-                /* add delta's values */
-                ADD_DELTAS();
-
-                pb -= dy * stride - 4;  /* next position */
-            }
+            DO_RECT_H(DO_PIXEL_HIGH, ADD_DELTAS);
         }
     }
     else
     {
         /* fill rectangle horizontally (w/o dithering) */
-        for (x1 = 0; x1 < dx; x1++)
-        {
-            /* render the column */
-            for (y1 = 0; y1 < dy; y1++)
-            {
-                DO_PIXEL_ALPHA();
-
-                pb += stride - 4;   /* next position */
-            }
-
-            /* add delta's values */
-            ADD_DELTAS_ALPHA();
-
-            pb -= dy * stride - 4;  /* next position */
-        }
+        DO_RECT_H   (DO_PIXEL_ALPHA, ADD_DELTAS_ALPHA);
     }
 }
 
@@ -307,59 +288,17 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
         /* fill rectangle vertically (dithering) */
         if (bLow)
         {
-            for (y1 = 0; y1 < dy; y1++)
-            {
-                /* render one row */
-                for (x1 = 0; x1 < dx; x1++)
-                {
-                    DO_PIXEL_LOW();
-                }
-
-                /* add delta's values */
-                ADD_DELTAS();
-
-                /* next position */
-                pb -= dx * 4;
-                pb += stride;
-            }
+            DO_RECT_V(DO_PIXEL_LOW, ADD_DELTAS);
         }
         else
         {
-            for (y1 = 0; y1 < dy; y1++)
-            {
-                /* render one row */
-                for (x1 = 0; x1 < dx; x1++)
-                {
-                    DO_PIXEL_HIGH();
-                }
-
-                /* add delta's values */
-                ADD_DELTAS();
-
-                /* next position */
-                pb -= dx * 4;
-                pb += stride;
-            }
+            DO_RECT_V(DO_PIXEL_HIGH, ADD_DELTAS);
         }
     }
     else
     {
         /* fill rectangle vertically (w/o dithering) */
-        for (y1 = 0; y1 < dy; y1++)
-        {
-            /* render one row */
-            for (x1 = 0; x1 < dx; x1++)
-            {
-                DO_PIXEL_ALPHA();
-            }
-
-            /* add delta's values */
-            ADD_DELTAS_ALPHA();
-
-            /* next position */
-            pb -= dx * 4;
-            pb += stride;
-        }
+        DO_RECT_V(DO_PIXEL_ALPHA, ADD_DELTAS_ALPHA);
     }
 }
 
