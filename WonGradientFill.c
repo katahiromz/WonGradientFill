@@ -375,7 +375,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
     }
 }
 
-#define CREATE_MEM_BMP(hbmMem,hMemDC,cx,cy) \
+#define CREATE_MEM_BMP() \
     bmi.bmiHeader.biWidth = cx; \
     bmi.bmiHeader.biHeight = -cy; \
     bmi.bmiHeader.biPlanes = 1; \
@@ -387,7 +387,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
         return FALSE; \
     }
 
-#define CHECK_BITSPIXEL(bDither,bLow,hbm,bm) \
+#define CHECK_BITSPIXEL() \
     hbm = (HBITMAP)GetCurrentObject(hDC, OBJ_BITMAP); \
     if (hbm && GetObject(hbm, sizeof(BITMAP), &bm)) \
     { \
@@ -426,10 +426,10 @@ IntGradFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     /* create a 32-bpp DIB section */
     cx = xMax - xMin;
     cy = yMax - yMin;
-    CREATE_MEM_BMP(hbmMem, hMemDC, cx, cy);
+    CREATE_MEM_BMP();
 
     /* will we do dithering? */
-    CHECK_BITSPIXEL(bDither, bLow, hbm, bm);
+    CHECK_BITSPIXEL();
 
     /* select hbmMem */
     hbmMemOld = SelectObject(hMemDC, hbmMem);
@@ -495,10 +495,10 @@ IntGradFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     /* create a 32-bpp DIB section */
     cx = xMax - xMin;
     cy = yMax - yMin;
-    CREATE_MEM_BMP(hbmMem, hMemDC, cx, cy);
+    CREATE_MEM_BMP();
 
     /* will we do dithering? */
-    CHECK_BITSPIXEL(bDither, bLow, hbm, bm);
+    CHECK_BITSPIXEL();
 
     /* select hbmMem */
     hbmMemOld = SelectObject(hMemDC, hbmMem);
