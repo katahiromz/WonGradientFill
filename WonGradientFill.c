@@ -83,14 +83,14 @@ static INLINE BYTE BayerDitheringHigh(ULONG x, ULONG y, BYTE b)
 } while (0)
 
 #define ADD_DELTAS() \
-    r1 += dr; \
-    g1 += dg; \
-    b1 += db;
+    r1 += (COLOR16)dr; \
+    g1 += (COLOR16)dg; \
+    b1 += (COLOR16)db;
 #define ADD_DELTAS_ALPHA() \
-    r1 += dr; \
-    g1 += dg; \
-    b1 += db; \
-    a1 += da;
+    r1 += (COLOR16)dr; \
+    g1 += (COLOR16)dg; \
+    b1 += (COLOR16)db; \
+    a1 += (COLOR16)da;
 #define CALC_DELTAS() \
     dx = x2 - x1; \
     if (dx != 0) \
@@ -164,7 +164,7 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
               GRADIENT_RECT *rect, BOOL bDither, BOOL bLow)
 {
     COLOR16 r1, g1, b1, a1;
-    COLOR16 dr, dg, db, da;
+    LONG dr, dg, db, da;
     LONG dx, dy, x1, y1, x0, y0;
     ULONG stride;
     LPBYTE pb;
@@ -226,7 +226,7 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
               GRADIENT_RECT *rect, BOOL bDither, BOOL bLow)
 {
     COLOR16 r1, g1, b1, a1;
-    COLOR16 dr, dg, db, da;
+    LONG dr, dg, db, da;
     LONG dx, dy, x1, y1, x0, y0;
     ULONG stride;
     LPBYTE pb;
@@ -347,7 +347,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                  BOOL bDither, BOOL bLow)
 {
     COLOR16 r1, g1, b1, a1, r2, g2, b2, a2;
-    COLOR16 dr, dg, db, da;
+    LONG dr, dg, db, da;
     LONG dx, x1, y1, x2, x0, y0;
     LPBYTE pb;
 
