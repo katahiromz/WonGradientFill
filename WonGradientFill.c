@@ -329,6 +329,41 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
         DO_P(); \
         ADD_D(); \
     }
+#define DO_RENDER(DO_P,ADD_D,CALC_E,CALC_D) \
+    for (y1 = v1->y; y1 < v2->y; y1++) \
+    { \
+        if (v2->x < v3->x) \
+        { \
+            CALC_E(v1, v2, v1, v3); \
+            CALC_D(); \
+            pb = &GET_BYTE(x1 - xMin, y1 - yMin); \
+            DO_LINE(DO_P, ADD_D); \
+        } \
+        else \
+        { \
+            CALC_E(v1, v3, v1, v2); \
+            CALC_D(); \
+            pb = &GET_BYTE(x1 - xMin, y1 - yMin); \
+            DO_LINE(DO_P, ADD_D); \
+        } \
+    } \
+    for (y1 = v2->y; y1 < v3->y; y1++) \
+    { \
+        if (v2->x < v3->x) \
+        { \
+            CALC_E(v2, v3, v1, v3); \
+            CALC_D(); \
+            pb = &GET_BYTE(x1 - xMin, y1 - yMin); \
+            DO_LINE(DO_P, ADD_D); \
+        } \
+        else \
+        { \
+            CALC_E(v1, v3, v2, v3); \
+            CALC_D(); \
+            pb = &GET_BYTE(x1 - xMin, y1 - yMin); \
+            DO_LINE(DO_P, ADD_D); \
+        } \
+    }
 
 static void WINAPI
 MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
@@ -348,205 +383,16 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
     {
         if (bLow)
         {
-            /* the upper triangle (dithering) */
-            for (y1 = v1->y; y1 < v2->y; y1++)
-            {
-                if (v2->x < v3->x)
-                {
-                    /* calculate the edge values */
-                    CALC_EDGE(v1, v2, v1, v3);
-
-                    /* calculate delta's */
-                    CALC_DELTAS();
-
-                    /* calculate the first position */
-                    pb = &GET_BYTE(x1 - xMin, y1 - yMin);
-
-                    /* do rendering */
-                    DO_LINE(DO_PIXEL_LOW, ADD_DELTAS);
-                }
-                else
-                {
-                    /* calculate the edge values */
-                    CALC_EDGE(v1, v3, v1, v2);
-
-                    /* calculate delta's */
-                    CALC_DELTAS();
-
-                    /* calculate the first position */
-                    pb = &GET_BYTE(x1 - xMin, y1 - yMin);
-
-                    /* do rendering */
-                    DO_LINE(DO_PIXEL_LOW, ADD_DELTAS);
-                }
-            }
-            /* the lower triangle (dithering) */
-            for (y1 = v2->y; y1 < v3->y; y1++)
-            {
-                if (v2->x < v3->x)
-                {
-                    /* calculate the edge values */
-                    CALC_EDGE(v2, v3, v1, v3);
-
-                    /* calculate delta's */
-                    CALC_DELTAS();
-
-                    /* calculate the first position */
-                    pb = &GET_BYTE(x1 - xMin, y1 - yMin);
-
-                    /* do rendering */
-                    DO_LINE(DO_PIXEL_LOW, ADD_DELTAS);
-                }
-                else
-                {
-                    /* calculate the edge values */
-                    CALC_EDGE(v1, v3, v2, v3);
-
-                    /* calculate delta's */
-                    CALC_DELTAS();
-
-                    /* calculate the first position */
-                    pb = &GET_BYTE(x1 - xMin, y1 - yMin);
-
-                    /* do rendering */
-                    DO_LINE(DO_PIXEL_LOW, ADD_DELTAS);
-                }
-            }
+            DO_RENDER(DO_PIXEL_LOW, ADD_DELTAS, CALC_EDGE, CALC_DELTAS);
         }
         else
         {
-            /* the upper triangle (dithering) */
-            for (y1 = v1->y; y1 < v2->y; y1++)
-            {
-                if (v2->x < v3->x)
-                {
-                    /* calculate the edge values */
-                    CALC_EDGE(v1, v2, v1, v3);
-
-                    /* calculate delta's */
-                    CALC_DELTAS();
-
-                    /* calculate the first position */
-                    pb = &GET_BYTE(x1 - xMin, y1 - yMin);
-
-                    /* do rendering */
-                    DO_LINE(DO_PIXEL_HIGH, ADD_DELTAS);
-                }
-                else
-                {
-                    /* calculate the edge values */
-                    CALC_EDGE(v1, v3, v1, v2);
-
-                    /* calculate delta's */
-                    CALC_DELTAS();
-
-                    /* calculate the first position */
-                    pb = &GET_BYTE(x1 - xMin, y1 - yMin);
-
-                    /* do rendering */
-                    DO_LINE(DO_PIXEL_HIGH, ADD_DELTAS);
-                }
-            }
-            /* the lower triangle (dithering) */
-            for (y1 = v2->y; y1 < v3->y; y1++)
-            {
-                if (v2->x < v3->x)
-                {
-                    /* calculate the edge values */
-                    CALC_EDGE(v2, v3, v1, v3);
-
-                    /* calculate delta's */
-                    CALC_DELTAS();
-
-                    /* calculate the first position */
-                    pb = &GET_BYTE(x1 - xMin, y1 - yMin);
-
-                    /* do rendering */
-                    DO_LINE(DO_PIXEL_HIGH, ADD_DELTAS);
-                }
-                else
-                {
-                    /* calculate the edge values */
-                    CALC_EDGE(v1, v3, v2, v3);
-
-                    /* calculate delta's */
-                    CALC_DELTAS();
-
-                    /* calculate the first position */
-                    pb = &GET_BYTE(x1 - xMin, y1 - yMin);
-
-                    /* do rendering */
-                    DO_LINE(DO_PIXEL_HIGH, ADD_DELTAS);
-                }
-            }
+            DO_RENDER(DO_PIXEL_HIGH, ADD_DELTAS, CALC_EDGE, CALC_DELTAS);
         }
     }
     else
     {
-        /* the upper triangle (w/o dithering) */
-        for (y1 = v1->y; y1 < v2->y; y1++)
-        {
-            if (v2->x < v3->x)
-            {
-                /* calculate the edge values */
-                CALC_EDGE_ALPHA(v1, v2, v1, v3);
-
-                /* calculate delta's */
-                CALC_DELTAS_ALPHA();
-
-                /* calculate the first position */
-                pb = &GET_BYTE(x1 - xMin, y1 - yMin);
-
-                /* do rendering */
-                DO_LINE(DO_PIXEL_ALPHA, ADD_DELTAS_ALPHA);
-            }
-            else
-            {
-                /* calculate the edge values */
-                CALC_EDGE_ALPHA(v1, v3, v1, v2);
-
-                /* calculate delta's */
-                CALC_DELTAS_ALPHA();
-
-                /* calculate the first position */
-                pb = &GET_BYTE(x1 - xMin, y1 - yMin);
-
-                /* do rendering */
-                DO_LINE(DO_PIXEL_ALPHA, ADD_DELTAS_ALPHA);
-            }
-        }
-        /* the lower triangle (w/o dithering) */
-        for (y1 = v2->y; y1 < v3->y; y1++)
-        {
-            if (v2->x < v3->x)
-            {
-                /* calculate the edge values */
-                CALC_EDGE_ALPHA(v2, v3, v1, v3);
-
-                /* add delta's values */
-                CALC_DELTAS_ALPHA();
-
-                /* calculate the first position */
-                pb = &GET_BYTE(x1 - xMin, y1 - yMin);
-
-                /* do rendering */
-                DO_LINE(DO_PIXEL_ALPHA, ADD_DELTAS_ALPHA);
-            }
-            else
-            {
-                /* calculate the edge values */
-                CALC_EDGE_ALPHA(v1, v3, v2, v3);
-
-                /* calculate delta's */
-                CALC_DELTAS_ALPHA();
-
-                /* calculate the first position */
-                pb = &GET_BYTE(x1 - xMin, y1 - yMin);
-
-                /* do rendering */
-                DO_LINE(DO_PIXEL_ALPHA, ADD_DELTAS_ALPHA);
-            }
-        }
+        DO_RENDER(DO_PIXEL_ALPHA, ADD_DELTAS_ALPHA, CALC_EDGE_ALPHA, CALC_DELTAS_ALPHA);
     }
 }
 
