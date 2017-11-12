@@ -56,6 +56,11 @@ static INLINE BYTE BayerDitheringHigh(ULONG x, ULONG y, BYTE b)
     }
 }
 
+#define SWAP(v1,v2,tmp) \
+    tmp = v1; \
+    v1 = v2; \
+    v2 = tmp;
+
 /* Calculate the extent of the verteces */
 #define GET_XY_MINMAX(i,x,y,pTriVertex,dwNumVertex) do { \
     xMin = xMax = pTriVertex[0].x; \
@@ -168,9 +173,7 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
     v2 = pTriVertex + rect->LowerRight;
     if (v1->x > v2->x)
     {
-        tmp = v2;
-        v2 = v1;
-        v1 = tmp;
+        SWAP(v1, v2, tmp);
     }
     assert(v1->x <= v2->x);
     x0 = v1->x;
@@ -232,9 +235,7 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
     v2 = pTriVertex + rect->LowerRight;
     if (v1->y > v2->y)
     {
-        tmp = v2;
-        v2 = v1;
-        v1 = tmp;
+        SWAP(v1, v2, tmp);
     }
     assert(v1->y <= v2->y);
     y0 = v1->y;
@@ -515,20 +516,14 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         /* sort v1, v2, v3 by y */
         if (v1->y > v2->y)
         {
-            tmp = v1;
-            v1 = v2;
-            v2 = tmp;
+            SWAP(v1, v2, tmp);
         }
         if (v2->y > v3->y)
         {
-            tmp = v2;
-            v2 = v3;
-            v3 = tmp;
+            SWAP(v2, v3, tmp);
             if (v1->y > v2->y)
             {
-                tmp = v1;
-                v1 = v2;
-                v2 = tmp;
+                SWAP(v1, v2, tmp);
             }
         }
         assert(v1->y <= v2->y && v2->y <= v3->y);
