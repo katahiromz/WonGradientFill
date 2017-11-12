@@ -583,15 +583,17 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     }
 
     /* will we do dithering? */
-    if (GetDeviceCaps(hDC, BITSPIXEL) < 24)
-    {
-        bDither = TRUE;
-    }
-    else
     {
         BITMAP bm;
         HBITMAP hbm = (HBITMAP)GetCurrentObject(hDC, OBJ_BITMAP);
-        bDither = (hbm && GetObject(hbm, sizeof(BITMAP), &bm) && bm.bmBitsPixel < 24);
+        if (hbm && GetObject(hbm, sizeof(BITMAP), &bm))
+        {
+            bDither = bm.bmBitsPixel < 24 || GetDeviceCaps(hDC, BITSPIXEL) < 24;
+        }
+        else
+        {
+            bDither = GetDeviceCaps(hDC, BITSPIXEL) < 24;
+        }
     }
 
     /* transfer to hMemDC */
@@ -676,15 +678,17 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     }
 
     /* will we do dithering? */
-    if (GetDeviceCaps(hDC, BITSPIXEL) < 24)
-    {
-        bDither = TRUE;
-    }
-    else
     {
         BITMAP bm;
         HBITMAP hbm = (HBITMAP)GetCurrentObject(hDC, OBJ_BITMAP);
-        bDither = (hbm && GetObject(hbm, sizeof(BITMAP), &bm) && bm.bmBitsPixel < 24);
+        if (hbm && GetObject(hbm, sizeof(BITMAP), &bm))
+        {
+            bDither = bm.bmBitsPixel < 24 || GetDeviceCaps(hDC, BITSPIXEL) < 24;
+        }
+        else
+        {
+            bDither = GetDeviceCaps(hDC, BITSPIXEL) < 24;
+        }
     }
 
     /* transfer to hMemDC */
