@@ -127,6 +127,7 @@ GetXYMinMax(XYMINMAX *pXYMinMax, TRIVERTEX *pTriVertex, ULONG dwNumVertex)
         dr = (r2 - r1) / dx; \
         da = (a2 - a1) / dx; \
     }
+#define GET_BYTE(x,y) pbBits[((y) * cx + (x)) * 4]
 
 static void WINAPI
 MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
@@ -168,12 +169,12 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
     /* calculate the first position */
     if (dy < 0)
     {
-        pb = pbBits + ((v2->y - yMin) * cx + (v1->x - xMin)) * 4;
+        pb = &GET_BYTE(v1->x - xMin, v2->y - yMin);
         dy = -dy;
     }
     else
     {
-        pb = pbBits + ((v1->y - yMin) * cx + (v1->x - xMin)) * 4;
+        pb = &GET_BYTE(v1->x - xMin, v1->y - yMin);
     }
 
     stride = cx * 4;    /* one row width */
@@ -264,12 +265,12 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
     /* calculate the first position */
     if (dx < 0)
     {
-        pb = pbBits + ((v1->y - yMin) * cx + (v2->x - xMin)) * 4;
+        pb = &GET_BYTE(v2->x - xMin, v1->y - yMin);
         dx = -dx;
     }
     else
     {
-        pb = pbBits + ((v1->y - yMin) * cx + (v1->x - xMin)) * 4;
+        pb = &GET_BYTE(v1->x - xMin, v1->y - yMin);
     }
 
     stride = cx * 4;    /* one row width */
@@ -371,7 +372,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 CALC_DELTAS();
 
                 /* calculate the first position */
-                pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
+                pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                 /* do rendering */
                 for ( ; x1 < x2; x1++)
@@ -394,7 +395,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 CALC_DELTAS();
 
                 /* calculate the first position */
-                pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
+                pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                 /* do rendering */
                 for ( ; x1 < x2; x1++)
@@ -421,7 +422,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 CALC_DELTAS();
 
                 /* calculate the first position */
-                pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
+                pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                 /* do rendering */
                 for ( ; x1 < x2; x1++)
@@ -444,7 +445,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 CALC_DELTAS();
 
                 /* calculate the first position */
-                pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
+                pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                 /* do rendering */
                 for ( ; x1 < x2; x1++)
@@ -474,7 +475,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 CALC_DELTAS_ALPHA();
 
                 /* calculate the first position */
-                pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
+                pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                 /* do rendering */
                 for ( ; x1 < x2; x1++)
@@ -497,7 +498,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 CALC_DELTAS_ALPHA();
 
                 /* calculate the first position */
-                pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
+                pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                 /* do rendering */
                 for ( ; x1 < x2; x1++)
@@ -524,7 +525,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 CALC_DELTAS_ALPHA();
 
                 /* calculate the first position */
-                pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
+                pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                 /* do rendering */
                 for ( ; x1 < x2; x1++)
@@ -547,7 +548,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 CALC_DELTAS_ALPHA();
 
                 /* calculate the first position */
-                pb = pbBits + (x1 - xMin) * 4 + (y1 - yMin) * stride;
+                pb = &GET_BYTE(x1 - xMin, y1 - yMin);
 
                 /* do rendering */
                 for ( ; x1 < x2; x1++)
