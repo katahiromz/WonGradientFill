@@ -374,7 +374,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
     }
 }
 
-#define CREATE_MEM_BMP(cx,cy) \
+#define CREATE_MEM_BMP(hbmMem,hMemDC,cx,cy) \
     bmi.bmiHeader.biWidth = cx; \
     bmi.bmiHeader.biHeight = -cy; \
     bmi.bmiHeader.biPlanes = 1; \
@@ -384,6 +384,19 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
     { \
         DeleteDC(hMemDC); \
         return FALSE; \
+    }
+
+#define CHECK_BITSPIXEL(bDither,bLow,hbm,bm) \
+    hbm = (HBITMAP)GetCurrentObject(hDC, OBJ_BITMAP); \
+    if (hbm && GetObject(hbm, sizeof(BITMAP), &bm)) \
+    { \
+        bDither = bm.bmBitsPixel < 24 || GetDeviceCaps(hDC, BITSPIXEL) < 24; \
+        bLow = bm.bmBitsPixel <= 4 || GetDeviceCaps(hDC, BITSPIXEL) <= 4; \
+    } \
+    else \
+    { \
+        bDither = GetDeviceCaps(hDC, BITSPIXEL) < 24; \
+        bLow = GetDeviceCaps(hDC, BITSPIXEL) <= 4; \
     }
 
 static BOOL WINAPI
@@ -412,20 +425,10 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     /* create a 32-bpp DIB section */
     cx = xMax - xMin;
     cy = yMax - yMin;
-    CREATE_MEM_BMP(cx, cy);
+    CREATE_MEM_BMP(hbmMem, hMemDC, cx, cy);
 
     /* will we do dithering? */
-    hbm = (HBITMAP)GetCurrentObject(hDC, OBJ_BITMAP);
-    if (hbm && GetObject(hbm, sizeof(BITMAP), &bm))
-    {
-        bDither = bm.bmBitsPixel < 24 || GetDeviceCaps(hDC, BITSPIXEL) < 24;
-        bLow = bm.bmBitsPixel <= 4 || GetDeviceCaps(hDC, BITSPIXEL) <= 4;
-    }
-    else
-    {
-        bDither = GetDeviceCaps(hDC, BITSPIXEL) < 24;
-        bLow = GetDeviceCaps(hDC, BITSPIXEL) <= 4;
-    }
+    CHECK_BITSPIXEL(bDither, bLow, hbm, bm);
 
     /* select hbmMem */
     hbmMemOld = SelectObject(hMemDC, hbmMem);
@@ -491,20 +494,10 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     /* create a 32-bpp DIB section */
     cx = xMax - xMin;
     cy = yMax - yMin;
-    CREATE_MEM_BMP(cx, cy);
+    CREATE_MEM_BMP(hbmMem, hMemDC, cx, cy);
 
     /* will we do dithering? */
-    hbm = (HBITMAP)GetCurrentObject(hDC, OBJ_BITMAP);
-    if (hbm && GetObject(hbm, sizeof(BITMAP), &bm))
-    {
-        bDither = bm.bmBitsPixel < 24 || GetDeviceCaps(hDC, BITSPIXEL) < 24;
-        bLow = bm.bmBitsPixel <= 4 || GetDeviceCaps(hDC, BITSPIXEL) <= 4;
-    }
-    else
-    {
-        bDither = GetDeviceCaps(hDC, BITSPIXEL) < 24;
-        bLow = GetDeviceCaps(hDC, BITSPIXEL) <= 4;
-    }
+    CHECK_BITSPIXEL(bDither, bLow, hbm, bm);
 
     /* select hbmMem */
     hbmMemOld = SelectObject(hMemDC, hbmMem);
