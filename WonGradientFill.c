@@ -17,7 +17,7 @@
     #endif
 #endif
 
-#define BV(x) (x * 255 / 64)
+#define BV(x) (x * 255 / 64 + 4)
 static const BYTE s_bayer_64[] =
 {
     BV(0),  BV(48), BV(12), BV(60), BV(3),  BV(51), BV(15), BV(63),
