@@ -43,6 +43,15 @@ struct MGradientFillTest : public MWindowBase
     {
     }
 
+    ~MGradientFillTest()
+    {
+        if (m_hbm)
+        {
+            DeleteObject(m_hbm);
+            m_hbm = NULL;
+        }
+    }
+
     virtual void ModifyWndClassDx(WNDCLASSEX& wcx)
     {
         wcx.hIconSm = wcx.hIcon = LoadIcon(NULL, IDI_APPLICATION);
@@ -79,14 +88,18 @@ struct MGradientFillTest : public MWindowBase
             bmi.bmiHeader.biBitCount = 8;
             {
                 HDC hDC = CreateCompatibleDC(NULL);
-                PALETTEENTRY entries[256];
-                GetSystemPaletteEntries(hDC, 0, 256, entries);
-                for (size_t i = 0; i < 256; ++i)
+                if (hDC)
                 {
-                    bmi.bmiColors[i].rgbBlue = entries[i].peBlue;
-                    bmi.bmiColors[i].rgbGreen = entries[i].peGreen;
-                    bmi.bmiColors[i].rgbRed = entries[i].peRed;
-                    bmi.bmiColors[i].rgbReserved = 0;
+                    PALETTEENTRY entries[256];
+                    GetSystemPaletteEntries(hDC, 0, 256, entries);
+                    for (size_t i = 0; i < 256; ++i)
+                    {
+                        bmi.bmiColors[i].rgbBlue = entries[i].peBlue;
+                        bmi.bmiColors[i].rgbGreen = entries[i].peGreen;
+                        bmi.bmiColors[i].rgbRed = entries[i].peRed;
+                        bmi.bmiColors[i].rgbReserved = 0;
+                    }
+                    DeleteDC(hDC);
                 }
             }
             break;
