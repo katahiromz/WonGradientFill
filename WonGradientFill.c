@@ -142,6 +142,16 @@ static INLINE BYTE BayerDitheringHigh(ULONG x, ULONG y, BYTE b)
         pb -= dx * 4; \
         pb += stride; \
     }
+#define INIT_DELTA(delta) \
+    dx = v2->x - v1->x; \
+    dy = v2->y - v1->y; \
+    if (delta != 0) \
+    { \
+        dr = (v2->Red - v1->Red) / delta; \
+        dg = (v2->Green - v1->Green) / delta; \
+        db = (v2->Blue - v1->Blue) / delta; \
+        da = (v2->Alpha - v1->Alpha) / delta; \
+    }
 
 static void WINAPI
 MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
@@ -171,15 +181,7 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
     a1 = v1->Alpha;
 
     /* calculate delta's */
-    dx = v2->x - v1->x;
-    dy = v2->y - v1->y;
-    if (dx != 0)
-    {
-        dr = (v2->Red - v1->Red) / dx;
-        dg = (v2->Green - v1->Green) / dx;
-        db = (v2->Blue - v1->Blue) / dx;
-        da = (v2->Alpha - v1->Alpha) / dx;
-    }
+    INIT_DELTA(dx);
 
     /* calculate the first position */
     if (dy < 0)
@@ -241,15 +243,7 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
     a1 = v1->Alpha;
 
     /* calculate delta's */
-    dx = v2->x - v1->x;
-    dy = v2->y - v1->y;
-    if (dy != 0)
-    {
-        dr = (v2->Red - v1->Red) / dy;
-        dg = (v2->Green - v1->Green) / dy;
-        db = (v2->Blue - v1->Blue) / dy;
-        da = (v2->Alpha - v1->Alpha) / dy;
-    }
+    INIT_DELTA(dy);
 
     /* calculate the first position */
     if (dx < 0)
