@@ -376,11 +376,12 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     LONG x, y, xMin, yMin, xMax, yMax, cx, cy;
     HDC hMemDC;
     HBITMAP hbmMem;
-    HGDIOBJ hbmMemOld;
+    HGDIOBJ hbm, hbmMemOld;
     LPBYTE pbBits;
     BITMAPINFO bmi = { { sizeof(BITMAPINFOHEADER) } };
     BOOL bDither, bLow;
     ULONG i;
+    BITMAP bm;
     GRADIENT_RECT *rect = (GRADIENT_RECT *)pMesh;
 
     /* get the extent */
@@ -406,19 +407,16 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     }
 
     /* will we do dithering? */
+    hbm = (HBITMAP)GetCurrentObject(hDC, OBJ_BITMAP);
+    if (hbm && GetObject(hbm, sizeof(BITMAP), &bm))
     {
-        BITMAP bm;
-        HBITMAP hbm = (HBITMAP)GetCurrentObject(hDC, OBJ_BITMAP);
-        if (hbm && GetObject(hbm, sizeof(BITMAP), &bm))
-        {
-            bDither = bm.bmBitsPixel < 24 || GetDeviceCaps(hDC, BITSPIXEL) < 24;
-            bLow = bm.bmBitsPixel <= 4 || GetDeviceCaps(hDC, BITSPIXEL) <= 4;
-        }
-        else
-        {
-            bDither = GetDeviceCaps(hDC, BITSPIXEL) < 24;
-            bLow = GetDeviceCaps(hDC, BITSPIXEL) <= 4;
-        }
+        bDither = bm.bmBitsPixel < 24 || GetDeviceCaps(hDC, BITSPIXEL) < 24;
+        bLow = bm.bmBitsPixel <= 4 || GetDeviceCaps(hDC, BITSPIXEL) <= 4;
+    }
+    else
+    {
+        bDither = GetDeviceCaps(hDC, BITSPIXEL) < 24;
+        bLow = GetDeviceCaps(hDC, BITSPIXEL) <= 4;
     }
 
     /* transfer to hMemDC */
@@ -468,10 +466,11 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     BITMAPINFO bmi = { { sizeof(BITMAPINFOHEADER) } };
     BOOL bDither, bLow;
     HDC hMemDC;
-    HBITMAP hbmMem;
+    HBITMAP hbm, hbmMem;
     HGDIOBJ hbmMemOld;
     LPBYTE pbBits;
     ULONG i;
+    BITMAP bm;
     GRADIENT_TRIANGLE *triangle = (GRADIENT_TRIANGLE *)pMesh;
     TRIVERTEX *v1, *v2, *v3;
 
@@ -498,19 +497,16 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     }
 
     /* will we do dithering? */
+    hbm = (HBITMAP)GetCurrentObject(hDC, OBJ_BITMAP);
+    if (hbm && GetObject(hbm, sizeof(BITMAP), &bm))
     {
-        BITMAP bm;
-        HBITMAP hbm = (HBITMAP)GetCurrentObject(hDC, OBJ_BITMAP);
-        if (hbm && GetObject(hbm, sizeof(BITMAP), &bm))
-        {
-            bDither = bm.bmBitsPixel < 24 || GetDeviceCaps(hDC, BITSPIXEL) < 24;
-            bLow = bm.bmBitsPixel <= 4 || GetDeviceCaps(hDC, BITSPIXEL) <= 4;
-        }
-        else
-        {
-            bDither = GetDeviceCaps(hDC, BITSPIXEL) < 24;
-            bLow = GetDeviceCaps(hDC, BITSPIXEL) <= 4;
-        }
+        bDither = bm.bmBitsPixel < 24 || GetDeviceCaps(hDC, BITSPIXEL) < 24;
+        bLow = bm.bmBitsPixel <= 4 || GetDeviceCaps(hDC, BITSPIXEL) <= 4;
+    }
+    else
+    {
+        bDither = GetDeviceCaps(hDC, BITSPIXEL) < 24;
+        bLow = GetDeviceCaps(hDC, BITSPIXEL) <= 4;
     }
 
     /* transfer to hMemDC */
