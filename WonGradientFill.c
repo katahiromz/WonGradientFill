@@ -320,6 +320,27 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
     }
 }
 
+#define CALC_EDGE(v1,v2,w1,w2) \
+    x1 = v1->x + (v2->x - v1->x) * (y1 - v1->y) / (v2->y - v1->y); \
+    r1 = (COLOR16)(v1->Red   + (v2->Red   - v1->Red)   * (y1 - v1->y) / (v2->y - v1->y)); \
+    g1 = (COLOR16)(v1->Green + (v2->Green - v1->Green) * (y1 - v1->y) / (v2->y - v1->y)); \
+    b1 = (COLOR16)(v1->Blue  + (v2->Blue  - v1->Blue)  * (y1 - v1->y) / (v2->y - v1->y)); \
+    x2 = w1->x + (w2->x - w1->x) * (y1 - w1->y) / (w2->y - w1->y); \
+    r2 = (COLOR16)(w1->Red   + (w2->Red   - w1->Red)   * (y1 - w1->y) / (w2->y - w1->y)); \
+    g2 = (COLOR16)(w1->Green + (w2->Green - w1->Green) * (y1 - w1->y) / (w2->y - w1->y)); \
+    b2 = (COLOR16)(w1->Blue  + (w2->Blue  - w1->Blue)  * (y1 - w1->y) / (w2->y - w1->y));
+#define CALC_EDGE_ALPHA(v1,v2,w1,w2) \
+    x1 = v1->x + (v2->x - v1->x) * (y1 - v1->y) / (v2->y - v1->y); \
+    r1 = (COLOR16)(v1->Red   + (v2->Red   - v1->Red)   * (y1 - v1->y) / (v2->y - v1->y)); \
+    g1 = (COLOR16)(v1->Green + (v2->Green - v1->Green) * (y1 - v1->y) / (v2->y - v1->y)); \
+    b1 = (COLOR16)(v1->Blue  + (v2->Blue  - v1->Blue)  * (y1 - v1->y) / (v2->y - v1->y)); \
+    a1 = (COLOR16)(v1->Alpha + (v2->Alpha - v1->Alpha) * (y1 - v1->y) / (v2->y - v1->y)); \
+    x2 = w1->x + (w2->x - w1->x) * (y1 - w1->y) / (w2->y - w1->y); \
+    r2 = (COLOR16)(w1->Red   + (w2->Red   - w1->Red)   * (y1 - w1->y) / (w2->y - w1->y)); \
+    g2 = (COLOR16)(w1->Green + (w2->Green - w1->Green) * (y1 - w1->y) / (w2->y - w1->y)); \
+    b2 = (COLOR16)(w1->Blue  + (w2->Blue  - w1->Blue)  * (y1 - w1->y) / (w2->y - w1->y)); \
+    a2 = (COLOR16)(w1->Alpha + (w2->Alpha - w1->Alpha) * (y1 - w1->y) / (w2->y - w1->y));
+
 static void WINAPI
 MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                  const TRIVERTEX *v1,
@@ -344,14 +365,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             if (v2->x < v3->x)
             {
                 /* calculate the edge values */
-                x1 = v1->x + (v2->x - v1->x) * (y1 - v1->y) / (v2->y - v1->y);
-                r1 = (COLOR16)(v1->Red   + (v2->Red   - v1->Red)   * (y1 - v1->y) / (v2->y - v1->y));
-                g1 = (COLOR16)(v1->Green + (v2->Green - v1->Green) * (y1 - v1->y) / (v2->y - v1->y));
-                b1 = (COLOR16)(v1->Blue  + (v2->Blue  - v1->Blue)  * (y1 - v1->y) / (v2->y - v1->y));
-                x2 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
-                r2 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
-                g2 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
-                b2 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
+                CALC_EDGE(v1, v2, v1, v3);
 
                 /* calculate delta's */
                 CALC_DELTAS();
@@ -374,14 +388,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             else
             {
                 /* calculate the edge values */
-                x1 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
-                r1 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
-                g1 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
-                b1 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
-                x2 = v1->x + (v2->x - v1->x) * (y1 - v1->y) / (v2->y - v1->y);
-                r2 = (COLOR16)(v1->Red   + (v2->Red   - v1->Red)   * (y1 - v1->y) / (v2->y - v1->y));
-                g2 = (COLOR16)(v1->Green + (v2->Green - v1->Green) * (y1 - v1->y) / (v2->y - v1->y));
-                b2 = (COLOR16)(v1->Blue  + (v2->Blue  - v1->Blue)  * (y1 - v1->y) / (v2->y - v1->y));
+                CALC_EDGE(v1, v3, v1, v2);
 
                 /* calculate delta's */
                 CALC_DELTAS();
@@ -408,14 +415,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             if (v2->x < v3->x)
             {
                 /* calculate the edge values */
-                x1 = v2->x + (v3->x - v2->x) * (y1 - v2->y) / (v3->y - v2->y);
-                r1 = (COLOR16)(v2->Red   + (v3->Red   - v2->Red)   * (y1 - v2->y) / (v3->y - v2->y));
-                g1 = (COLOR16)(v2->Green + (v3->Green - v2->Green) * (y1 - v2->y) / (v3->y - v2->y));
-                b1 = (COLOR16)(v2->Blue  + (v3->Blue  - v2->Blue)  * (y1 - v2->y) / (v3->y - v2->y));
-                x2 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
-                r2 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
-                g2 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
-                b2 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
+                CALC_EDGE(v2, v3, v1, v3);
 
                 /* calculate delta's */
                 CALC_DELTAS();
@@ -438,14 +438,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             else
             {
                 /* calculate the edge values */
-                x1 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
-                r1 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
-                g1 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
-                b1 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
-                x2 = v2->x + (v3->x - v2->x) * (y1 - v2->y) / (v3->y - v2->y);
-                r2 = (COLOR16)(v2->Red   + (v3->Red   - v2->Red)   * (y1 - v2->y) / (v3->y - v2->y));
-                g2 = (COLOR16)(v2->Green + (v3->Green - v2->Green) * (y1 - v2->y) / (v3->y - v2->y));
-                b2 = (COLOR16)(v2->Blue  + (v3->Blue  - v2->Blue)  * (y1 - v2->y) / (v3->y - v2->y));
+                CALC_EDGE(v1, v3, v2, v3);
 
                 /* calculate delta's */
                 CALC_DELTAS();
@@ -475,16 +468,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             if (v2->x < v3->x)
             {
                 /* calculate the edge values */
-                x1 = v1->x + (v2->x - v1->x) * (y1 - v1->y) / (v2->y - v1->y);
-                r1 = (COLOR16)(v1->Red   + (v2->Red   - v1->Red)   * (y1 - v1->y) / (v2->y - v1->y));
-                g1 = (COLOR16)(v1->Green + (v2->Green - v1->Green) * (y1 - v1->y) / (v2->y - v1->y));
-                b1 = (COLOR16)(v1->Blue  + (v2->Blue  - v1->Blue)  * (y1 - v1->y) / (v2->y - v1->y));
-                a1 = (COLOR16)(v1->Alpha + (v2->Alpha - v1->Alpha) * (y1 - v1->y) / (v2->y - v1->y));
-                x2 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
-                r2 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
-                g2 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
-                b2 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
-                a2 = (COLOR16)(v1->Alpha + (v3->Alpha - v1->Alpha) * (y1 - v1->y) / (v3->y - v1->y));
+                CALC_EDGE_ALPHA(v1, v2, v1, v3);
 
                 /* calculate delta's */
                 CALC_DELTAS_ALPHA();
@@ -507,16 +491,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             else
             {
                 /* calculate the edge values */
-                x1 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
-                r1 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
-                g1 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
-                b1 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
-                a1 = (COLOR16)(v1->Alpha + (v3->Alpha - v1->Alpha) * (y1 - v1->y) / (v3->y - v1->y));
-                x2 = v1->x + (v2->x - v1->x) * (y1 - v1->y) / (v2->y - v1->y);
-                r2 = (COLOR16)(v1->Red   + (v2->Red   - v1->Red)   * (y1 - v1->y) / (v2->y - v1->y));
-                g2 = (COLOR16)(v1->Green + (v2->Green - v1->Green) * (y1 - v1->y) / (v2->y - v1->y));
-                b2 = (COLOR16)(v1->Blue  + (v2->Blue  - v1->Blue)  * (y1 - v1->y) / (v2->y - v1->y));
-                a2 = (COLOR16)(v1->Alpha + (v2->Alpha - v1->Alpha) * (y1 - v1->y) / (v2->y - v1->y));
+                CALC_EDGE_ALPHA(v1, v3, v1, v2);
 
                 /* calculate delta's */
                 CALC_DELTAS_ALPHA();
@@ -543,16 +518,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             if (v2->x < v3->x)
             {
                 /* calculate the edge values */
-                x1 = v2->x + (v3->x - v2->x) * (y1 - v2->y) / (v3->y - v2->y);
-                r1 = (COLOR16)(v2->Red   + (v3->Red   - v2->Red)   * (y1 - v2->y) / (v3->y - v2->y));
-                g1 = (COLOR16)(v2->Green + (v3->Green - v2->Green) * (y1 - v2->y) / (v3->y - v2->y));
-                b1 = (COLOR16)(v2->Blue  + (v3->Blue  - v2->Blue)  * (y1 - v2->y) / (v3->y - v2->y));
-                a1 = (COLOR16)(v2->Alpha + (v3->Alpha - v2->Alpha) * (y1 - v2->y) / (v3->y - v2->y));
-                x2 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
-                r2 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
-                g2 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
-                b2 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
-                a2 = (COLOR16)(v1->Alpha + (v3->Alpha - v1->Alpha) * (y1 - v1->y) / (v3->y - v1->y));
+                CALC_EDGE_ALPHA(v2, v3, v1, v3);
 
                 /* add delta's values */
                 CALC_DELTAS_ALPHA();
@@ -575,16 +541,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
             else
             {
                 /* calculate the edge values */
-                x1 = v1->x + (v3->x - v1->x) * (y1 - v1->y) / (v3->y - v1->y);
-                r1 = (COLOR16)(v1->Red   + (v3->Red   - v1->Red)   * (y1 - v1->y) / (v3->y - v1->y));
-                g1 = (COLOR16)(v1->Green + (v3->Green - v1->Green) * (y1 - v1->y) / (v3->y - v1->y));
-                b1 = (COLOR16)(v1->Blue  + (v3->Blue  - v1->Blue)  * (y1 - v1->y) / (v3->y - v1->y));
-                a1 = (COLOR16)(v1->Alpha + (v3->Alpha - v1->Alpha) * (y1 - v1->y) / (v3->y - v1->y));
-                x2 = v2->x + (v3->x - v2->x) * (y1 - v2->y) / (v3->y - v2->y);
-                r2 = (COLOR16)(v2->Red   + (v3->Red   - v2->Red)   * (y1 - v2->y) / (v3->y - v2->y));
-                g2 = (COLOR16)(v2->Green + (v3->Green - v2->Green) * (y1 - v2->y) / (v3->y - v2->y));
-                b2 = (COLOR16)(v2->Blue  + (v3->Blue  - v2->Blue)  * (y1 - v2->y) / (v3->y - v2->y));
-                a2 = (COLOR16)(v2->Alpha + (v3->Alpha - v2->Alpha) * (y1 - v2->y) / (v3->y - v2->y));
+                CALC_EDGE_ALPHA(v1, v3, v2, v3);
 
                 /* calculate delta's */
                 CALC_DELTAS_ALPHA();
@@ -621,7 +578,7 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     BITMAPINFO bmi = { { sizeof(BITMAPINFOHEADER) } };
     BOOL bDither;
     ULONG i;
-    GRADIENT_RECT *rect;
+    GRADIENT_RECT *rect = (GRADIENT_RECT *)pMesh;
 
     /* get the extent */
     GetXYMinMax(&xyminmax, pTriVertex, dwNumVertex);
@@ -673,18 +630,16 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     if (bVertical)
     {
         /* vertical */
-        for (i = 0; i < dwNumMesh; ++i)
+        for (i = 0; i < dwNumMesh; ++i, ++rect)
         {
-            rect = (GRADIENT_RECT *)pMesh + i;
             MeshFillRectV(pbBits, cx, cy, pTriVertex, rect, xMin, yMin, bDither);
         }
     }
     else
     {
         /* horizontal */
-        for (i = 0; i < dwNumMesh; ++i)
+        for (i = 0; i < dwNumMesh; ++i, ++rect)
         {
-            rect = (GRADIENT_RECT *)pMesh + i;
             MeshFillRectH(pbBits, cx, cy, pTriVertex, rect, xMin, yMin, bDither);
         }
     }
@@ -715,7 +670,7 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     HGDIOBJ hbmMemOld;
     LPBYTE pbBits;
     ULONG i;
-    GRADIENT_TRIANGLE *triangle;
+    GRADIENT_TRIANGLE *triangle = (GRADIENT_TRIANGLE *)pMesh;
     const TRIVERTEX *v1;
     const TRIVERTEX *v2;
     const TRIVERTEX *v3;
@@ -767,9 +722,8 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     hbmMemOld = SelectObject(hMemDC, hbmMem);
 
     /* do main process */
-    for (i = 0; i < dwNumMesh; ++i)
+    for (i = 0; i < dwNumMesh; ++i, ++triangle)
     {
-        triangle = (GRADIENT_TRIANGLE *)pMesh + i;
         v1 = pTriVertex + triangle->Vertex1;
         v2 = pTriVertex + triangle->Vertex2;
         v3 = pTriVertex + triangle->Vertex3;
