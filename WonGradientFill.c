@@ -129,6 +129,12 @@ GetXYMinMax(XYMINMAX *pXYMinMax, TRIVERTEX *pTriVertex, ULONG dwNumVertex)
     }
 #define GET_BYTE(x,y) pbBits[((y) * cx + (x)) * 4]
 
+#define DO_PIXEL_LOW() \
+    *pb++ = BayerDithering(x1, y1, b1 >> 8); \
+    *pb++ = BayerDithering(x1, y1, g1 >> 8); \
+    *pb++ = BayerDithering(x1, y1, r1 >> 8); \
+    pb++;   /* skip alpha value */
+
 static void WINAPI
 MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
               GRADIENT_RECT *rect, INT xMin, INT yMin, BOOL bDither)
@@ -188,10 +194,7 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
             /* render the column */
             for (y1 = 0; y1 < dy; y1++)
             {
-                *pb++ = BayerDithering(x1, y1, b1 >> 8);
-                *pb++ = BayerDithering(x1, y1, g1 >> 8);
-                *pb++ = BayerDithering(x1, y1, r1 >> 8);
-                pb++;   /* skip alpha value */
+                DO_PIXEL_LOW();
 
                 pb += stride - 4;   /* next position */
             }
@@ -285,10 +288,7 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
             /* render one row */
             for (x1 = 0; x1 < dx; x1++)
             {
-                *pb++ = BayerDithering(x1, y1, b1 >> 8);
-                *pb++ = BayerDithering(x1, y1, g1 >> 8);
-                *pb++ = BayerDithering(x1, y1, r1 >> 8);
-                pb++;   /* skip alpha value */
+                DO_PIXEL_LOW();
             }
 
             /* add delta's values */
@@ -377,10 +377,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 /* do rendering */
                 for ( ; x1 < x2; x1++)
                 {
-                    *pb++ = BayerDithering(x1, y1, b1 >> 8);
-                    *pb++ = BayerDithering(x1, y1, g1 >> 8);
-                    *pb++ = BayerDithering(x1, y1, r1 >> 8);
-                    pb++;   /* skip alpha value */
+                    DO_PIXEL_LOW();
 
                     /* add delta's values */
                     ADD_DELTAS();
@@ -400,10 +397,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 /* do rendering */
                 for ( ; x1 < x2; x1++)
                 {
-                    *pb++ = BayerDithering(x1, y1, b1 >> 8);
-                    *pb++ = BayerDithering(x1, y1, g1 >> 8);
-                    *pb++ = BayerDithering(x1, y1, r1 >> 8);
-                    pb++;   /* skip alpha value */
+                    DO_PIXEL_LOW();
 
                     /* add delta's values */
                     ADD_DELTAS();
@@ -427,10 +421,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 /* do rendering */
                 for ( ; x1 < x2; x1++)
                 {
-                    *pb++ = BayerDithering(x1, y1, b1 >> 8);
-                    *pb++ = BayerDithering(x1, y1, g1 >> 8);
-                    *pb++ = BayerDithering(x1, y1, r1 >> 8);
-                    pb++;   /* skip alpha value */
+                    DO_PIXEL_LOW();
 
                     /* add delta's values */
                     ADD_DELTAS();
@@ -450,10 +441,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 /* do rendering */
                 for ( ; x1 < x2; x1++)
                 {
-                    *pb++ = BayerDithering(x1, y1, b1 >> 8);
-                    *pb++ = BayerDithering(x1, y1, g1 >> 8);
-                    *pb++ = BayerDithering(x1, y1, r1 >> 8);
-                    pb++;   /* skip alpha value */
+                    DO_PIXEL_LOW();
 
                     /* add delta's values */
                     ADD_DELTAS();
