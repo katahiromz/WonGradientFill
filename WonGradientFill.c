@@ -171,8 +171,8 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
     TRIVERTEX *v1, *v2, *tmp;
 
     /* sort v1, v2 by x */
-    v1 = pTriVertex + rect->UpperLeft;
-    v2 = pTriVertex + rect->LowerRight;
+    v1 = &pTriVertex[rect->UpperLeft];
+    v2 = &pTriVertex[rect->LowerRight];
     if (v1->x > v2->x)
     {
         SWAP(v1, v2, tmp);
@@ -233,8 +233,8 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
     TRIVERTEX *v1, *v2, *tmp;
 
     /* sort v1, v2 by y */
-    v1 = pTriVertex + rect->UpperLeft;
-    v2 = pTriVertex + rect->LowerRight;
+    v1 = &pTriVertex[rect->UpperLeft];
+    v2 = &pTriVertex[rect->LowerRight];
     if (v1->y > v2->y)
     {
         SWAP(v1, v2, tmp);
@@ -303,7 +303,6 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
     g2 = (COLOR16)(w1->Green + (w2->Green - w1->Green) * (y1 - w1->y) / (w2->y - w1->y)); \
     b2 = (COLOR16)(w1->Blue  + (w2->Blue  - w1->Blue)  * (y1 - w1->y) / (w2->y - w1->y)); \
     a2 = (COLOR16)(w1->Alpha + (w2->Alpha - w1->Alpha) * (y1 - w1->y) / (w2->y - w1->y));
-
 #define DO_LINE(DO_P,ADD_D) \
     for ( ; x1 < x2; ++x1) \
     { \
@@ -315,7 +314,6 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
     CALC_D(); \
     pb = &GET_BYTE(x1 - x0, y1 - y0); \
     DO_LINE(DO_P, ADD_D);
-
 #define DO_RENDER(DO_P,ADD_D,CALC_E,CALC_D) \
     for (y1 = v1->y; y1 < v2->y; y1++) \
     { \
@@ -464,8 +462,8 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     SelectObject(hMemDC, hbmMemOld);
 
     /* clean up */
-    DeleteObject(hbmMem);
     DeleteDC(hMemDC);
+    DeleteObject(hbmMem);
 
     return TRUE;    /* success */
 }
@@ -511,9 +509,9 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     /* do main process */
     for (i = 0; i < dwNumMesh; ++i, ++triangle)
     {
-        v1 = pTriVertex + triangle->Vertex1;
-        v2 = pTriVertex + triangle->Vertex2;
-        v3 = pTriVertex + triangle->Vertex3;
+        v1 = &pTriVertex[triangle->Vertex1];
+        v2 = &pTriVertex[triangle->Vertex2];
+        v3 = &pTriVertex[triangle->Vertex3];
 
         /* sort v1, v2, v3 by y */
         if (v1->y > v2->y)
@@ -540,8 +538,8 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     SelectObject(hMemDC, hbmMemOld);
 
     /* clean up */
-    DeleteObject(hbmMem);
     DeleteDC(hMemDC);
+    DeleteObject(hbmMem);
 
     return TRUE;    /* success */
 }
