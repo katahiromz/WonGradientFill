@@ -134,6 +134,11 @@ GetXYMinMax(XYMINMAX *pXYMinMax, TRIVERTEX *pTriVertex, ULONG dwNumVertex)
     *pb++ = BayerDithering(x1, y1, g1 >> 8); \
     *pb++ = BayerDithering(x1, y1, r1 >> 8); \
     pb++;   /* skip alpha value */
+#define DO_PIXEL_ALPHA() \
+    *pb++ = b1 >> 8; \
+    *pb++ = g1 >> 8; \
+    *pb++ = r1 >> 8; \
+    *pb++ = a1 >> 8;
 
 static void WINAPI
 MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
@@ -213,10 +218,7 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
             /* render the column */
             for (y1 = 0; y1 < dy; y1++)
             {
-                *pb++ = b1 >> 8;
-                *pb++ = g1 >> 8;
-                *pb++ = r1 >> 8;
-                *pb++ = a1 >> 8;
+                DO_PIXEL_ALPHA();
 
                 pb += stride - 4;   /* next position */
             }
@@ -307,10 +309,7 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
             /* render one row */
             for (x1 = 0; x1 < dx; x1++)
             {
-                *pb++ = b1 >> 8;
-                *pb++ = g1 >> 8;
-                *pb++ = r1 >> 8;
-                *pb++ = a1 >> 8;
+                DO_PIXEL_ALPHA();
             }
 
             /* add delta's values */
@@ -468,10 +467,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 /* do rendering */
                 for ( ; x1 < x2; x1++)
                 {
-                    *pb++ = b1 >> 8;
-                    *pb++ = g1 >> 8;
-                    *pb++ = r1 >> 8;
-                    *pb++ = a1 >> 8;
+                    DO_PIXEL_ALPHA();
 
                     /* add delta's values */
                     ADD_DELTAS_ALPHA();
@@ -491,10 +487,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 /* do rendering */
                 for ( ; x1 < x2; x1++)
                 {
-                    *pb++ = b1 >> 8;
-                    *pb++ = g1 >> 8;
-                    *pb++ = r1 >> 8;
-                    *pb++ = a1 >> 8;
+                    DO_PIXEL_ALPHA();
 
                     /* add delta's values */
                     ADD_DELTAS_ALPHA();
@@ -518,10 +511,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 /* do rendering */
                 for ( ; x1 < x2; x1++)
                 {
-                    *pb++ = b1 >> 8;
-                    *pb++ = g1 >> 8;
-                    *pb++ = r1 >> 8;
-                    *pb++ = a1 >> 8;
+                    DO_PIXEL_ALPHA();
 
                     /* add delta's values */
                     ADD_DELTAS_ALPHA();
@@ -541,10 +531,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                 /* do rendering */
                 for ( ; x1 < x2; x1++)
                 {
-                    *pb++ = b1 >> 8;
-                    *pb++ = g1 >> 8;
-                    *pb++ = r1 >> 8;
-                    *pb++ = a1 >> 8;
+                    DO_PIXEL_ALPHA();
 
                     /* add delta's values */
                     ADD_DELTAS_ALPHA();
