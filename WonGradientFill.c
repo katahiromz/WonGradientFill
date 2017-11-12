@@ -130,21 +130,22 @@ GetXYMinMax(XYMINMAX *pXYMinMax, TRIVERTEX *pTriVertex, ULONG dwNumVertex)
 #define GET_BYTE(x,y) pbBits[((y) * cx + (x)) * 4]
 
 static void WINAPI
-MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
-              const GRADIENT_RECT *rect, INT xMin, INT yMin, BOOL bDither)
+MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
+              GRADIENT_RECT *rect, INT xMin, INT yMin, BOOL bDither)
 {
     COLOR16 r1, g1, b1, a1;
     COLOR16 dr, dg, db, da;
     LONG dx, dy, x1, y1;
     ULONG stride;
     LPBYTE pb;
+    TRIVERTEX *v1, *v2, *tmp;
 
     /* sort v1, v2 by x */
-    const TRIVERTEX *v1 = pTriVertex + rect->UpperLeft;
-    const TRIVERTEX *v2 = pTriVertex + rect->LowerRight;
+    v1 = pTriVertex + rect->UpperLeft;
+    v2 = pTriVertex + rect->LowerRight;
     if (v1->x > v2->x)
     {
-        const TRIVERTEX *tmp = v2;
+        tmp = v2;
         v2 = v1;
         v1 = tmp;
     }
@@ -226,21 +227,22 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
 }
 
 static void WINAPI
-MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
-              const GRADIENT_RECT *rect, INT xMin, INT yMin, BOOL bDither)
+MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
+              GRADIENT_RECT *rect, INT xMin, INT yMin, BOOL bDither)
 {
     COLOR16 r1, g1, b1, a1;
     COLOR16 dr, dg, db, da;
     LONG dx, dy, x1, y1;
     ULONG stride;
     LPBYTE pb;
+    TRIVERTEX *v1, *v2, *tmp;
 
     /* sort v1, v2 by y */
-    const TRIVERTEX *v1 = pTriVertex + rect->UpperLeft;
-    const TRIVERTEX *v2 = pTriVertex + rect->LowerRight;
+    v1 = pTriVertex + rect->UpperLeft;
+    v2 = pTriVertex + rect->LowerRight;
     if (v1->y > v2->y)
     {
-        const TRIVERTEX *tmp = v2;
+        tmp = v2;
         v2 = v1;
         v1 = tmp;
     }
@@ -344,10 +346,8 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
 
 static void WINAPI
 MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
-                 const TRIVERTEX *v1,
-                 const TRIVERTEX *v2,
-                 const TRIVERTEX *v3,
-                 const GRADIENT_TRIANGLE *triangle,
+                 TRIVERTEX *v1, TRIVERTEX *v2, TRIVERTEX *v3,
+                 GRADIENT_TRIANGLE *triangle,
                  INT xMin, INT yMin, BOOL bDither)
 {
     COLOR16 r1, g1, b1, a1, r2, g2, b2, a2;
@@ -672,9 +672,7 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     LPBYTE pbBits;
     ULONG i;
     GRADIENT_TRIANGLE *triangle = (GRADIENT_TRIANGLE *)pMesh;
-    const TRIVERTEX *v1;
-    const TRIVERTEX *v2;
-    const TRIVERTEX *v3;
+    TRIVERTEX *v1, *v2, *v3;
 
     /* get the extent */
     GetXYMinMax(&xyminmax, pTriVertex, dwNumVertex);
@@ -732,13 +730,13 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         /* sort v1, v2, v3 */
         if (v1->y > v2->y)
         {
-            const TRIVERTEX *tmp = v1;
+            TRIVERTEX *tmp = v1;
             v1 = v2;
             v2 = tmp;
         }
         if (v2->y > v3->y)
         {
-            const TRIVERTEX *tmp = v2;
+            TRIVERTEX *tmp = v2;
             v2 = v3;
             v3 = tmp;
             if (v1->y > v2->y)
