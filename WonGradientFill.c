@@ -427,13 +427,11 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         bLow = GetDeviceCaps(hDC, BITSPIXEL) <= 4;
     }
 
-    /* transfer to hMemDC */
-    hbmMemOld = SelectObject(hMemDC, hbmMem);
-    BitBlt(hMemDC, 0, 0, cx, cy, hDC, xMin, yMin, SRCCOPY);
-    SelectObject(hMemDC, hbmMemOld);
-
     /* select hbmMem */
     hbmMemOld = SelectObject(hMemDC, hbmMem);
+
+    /* transfer to hMemDC */
+    BitBlt(hMemDC, 0, 0, cx, cy, hDC, xMin, yMin, SRCCOPY);
 
     /* do main process */
     if (bVertical)
@@ -508,13 +506,11 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         bLow = GetDeviceCaps(hDC, BITSPIXEL) <= 4;
     }
 
-    /* transfer to hMemDC */
-    hbmMemOld = SelectObject(hMemDC, hbmMem);
-    BitBlt(hMemDC, 0, 0, cx, cy, hDC, xMin, yMin, SRCCOPY);
-    SelectObject(hMemDC, hbmMemOld);
-
     /* select hbmMem */
     hbmMemOld = SelectObject(hMemDC, hbmMem);
+
+    /* transfer to hMemDC */
+    BitBlt(hMemDC, 0, 0, cx, cy, hDC, xMin, yMin, SRCCOPY);
 
     /* do main process */
     for (i = 0; i < dwNumMesh; ++i, ++triangle)
