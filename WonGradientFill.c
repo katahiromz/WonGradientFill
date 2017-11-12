@@ -41,7 +41,7 @@ static INLINE BYTE BayerDithering(ULONG x, ULONG y, BYTE b)
 static INLINE BYTE BayerDitheringHigh(ULONG x, ULONG y, BYTE b)
 {
     const BYTE value1 = s_bayer_64[(y & 7) * 8 + (x & 7)];
-    const BYTE value2 = s_bayer_64[(y & 7) * 8 + 7 ^ (x & 7)];
+    const BYTE value2 = s_bayer_64[(y & 7) * 8 + (7 ^ (x & 7))];
     if (value1 <= b)
     {
         if (value2 <= b)
@@ -350,7 +350,6 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
     COLOR16 dr, dg, db, da;
     LONG dx, x1, y1, x2;
     LPBYTE pb;
-    ULONG stride = cx * 4;    /* one row width */
 
     assert(v1->y <= v2->y && v2->y <= v3->y);
 
