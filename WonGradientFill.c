@@ -472,7 +472,7 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     ULONG i;
     BITMAP bm;
     GRADIENT_TRIANGLE *triangle = (GRADIENT_TRIANGLE *)pMesh;
-    TRIVERTEX *v1, *v2, *v3;
+    TRIVERTEX *v1, *v2, *v3, *tmp;
 
     /* get the extent */
     GET_XY_MINMAX(i, x, y, pTriVertex, dwNumVertex);
@@ -527,13 +527,13 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         /* sort v1, v2, v3 */
         if (v1->y > v2->y)
         {
-            TRIVERTEX *tmp = v1;
+            tmp = v1;
             v1 = v2;
             v2 = tmp;
         }
         if (v2->y > v3->y)
         {
-            TRIVERTEX *tmp = v2;
+            tmp = v2;
             v2 = v3;
             v3 = tmp;
             if (v1->y > v2->y)
