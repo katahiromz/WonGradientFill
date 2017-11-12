@@ -512,7 +512,7 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         v2 = pTriVertex + triangle->Vertex2;
         v3 = pTriVertex + triangle->Vertex3;
 
-        /* sort v1, v2, v3 */
+        /* sort v1, v2, v3 by y */
         if (v1->y > v2->y)
         {
             tmp = v1;
