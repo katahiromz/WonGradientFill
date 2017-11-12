@@ -102,7 +102,7 @@ GetXYMinMax(XYMINMAX *pXYMinMax, TRIVERTEX *pTriVertex, ULONG dwNumVertex)
 }
 
 static void WINAPI
-MeshFillRectH(HDC hDC, LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
+MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
               const GRADIENT_RECT *rect, INT xMin, INT yMin, BOOL bDither)
 {
     COLOR16 r1, g1, b1, a1;
@@ -203,7 +203,7 @@ MeshFillRectH(HDC hDC, LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriV
 }
 
 static void WINAPI
-MeshFillRectV(HDC hDC, LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
+MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
               const GRADIENT_RECT *rect, INT xMin, INT yMin, BOOL bDither)
 {
     COLOR16 r1, g1, b1, a1;
@@ -304,7 +304,7 @@ MeshFillRectV(HDC hDC, LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriV
 }
 
 static void WINAPI
-MeshFillTriangle(HDC hDC, LPBYTE pbBits, ULONG cx, ULONG cy,
+MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                  const TRIVERTEX *v1,
                  const TRIVERTEX *v2,
                  const TRIVERTEX *v3,
@@ -731,7 +731,7 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         for (i = 0; i < dwNumMesh; ++i)
         {
             rect = (GRADIENT_RECT *)pMesh + i;
-            MeshFillRectV(hDC, pbBits, cx, cy, pTriVertex, rect, xMin, yMin, bDither);
+            MeshFillRectV(pbBits, cx, cy, pTriVertex, rect, xMin, yMin, bDither);
         }
     }
     else
@@ -740,7 +740,7 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         for (i = 0; i < dwNumMesh; ++i)
         {
             rect = (GRADIENT_RECT *)pMesh + i;
-            MeshFillRectH(hDC, pbBits, cx, cy, pTriVertex, rect, xMin, yMin, bDither);
+            MeshFillRectH(pbBits, cx, cy, pTriVertex, rect, xMin, yMin, bDither);
         }
     }
 
@@ -850,7 +850,7 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         }
         assert(v1->y <= v2->y && v2->y <= v3->y);
 
-        MeshFillTriangle(hDC, pbBits, cx, cy, v1, v2, v3, triangle, xMin, yMin, bDither);
+        MeshFillTriangle(pbBits, cx, cy, v1, v2, v3, triangle, xMin, yMin, bDither);
     }
 
     /* transfer to hDC */
