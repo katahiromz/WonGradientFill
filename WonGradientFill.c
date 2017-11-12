@@ -101,6 +101,16 @@ GetXYMinMax(XYMINMAX *pXYMinMax, TRIVERTEX *pTriVertex, ULONG dwNumVertex)
     pXYMinMax->yMax = yMax;
 }
 
+#define ADD_DELTAS() \
+    r1 += dr; \
+    g1 += dg; \
+    b1 += db;
+#define ADD_DELTAS_ALPHA() \
+    r1 += dr; \
+    g1 += dg; \
+    b1 += db; \
+    a1 += da;
+
 static void WINAPI
 MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
               const GRADIENT_RECT *rect, INT xMin, INT yMin, BOOL bDither)
@@ -168,9 +178,7 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
             }
 
             /* add delta's values */
-            r1 += dr;
-            g1 += dg;
-            b1 += db;
+            ADD_DELTAS();
 
             pb -= dy * stride - 4;  /* next position */
         }
@@ -192,10 +200,7 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
             }
 
             /* add delta's values */
-            r1 += dr;
-            g1 += dg;
-            b1 += db;
-            a1 += da;
+            ADD_DELTAS_ALPHA();
 
             pb -= dy * stride - 4;  /* next position */
         }
@@ -267,9 +272,7 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
             }
 
             /* add delta's values */
-            r1 += dr;
-            g1 += dg;
-            b1 += db;
+            ADD_DELTAS();
 
             /* next position */
             pb -= dx * 4;
@@ -291,10 +294,7 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, const TRIVERTEX *pTriVertex,
             }
 
             /* add delta's values */
-            r1 += dr;
-            g1 += dg;
-            b1 += db;
-            a1 += da;
+            ADD_DELTAS_ALPHA();
 
             /* next position */
             pb -= dx * 4;
@@ -357,9 +357,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     pb++;   /* skip alpha value */
 
                     /* add delta's values */
-                    b1 += db;
-                    g1 += dg;
-                    r1 += dr;
+                    ADD_DELTAS();
                 }
             }
             else
@@ -395,9 +393,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     pb++;   /* skip alpha value */
 
                     /* add delta's values */
-                    b1 += db;
-                    g1 += dg;
-                    r1 += dr;
+                    ADD_DELTAS();
                 }
             }
         }
@@ -437,9 +433,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     pb++;   /* skip alpha value */
 
                     /* add delta's values */
-                    b1 += db;
-                    g1 += dg;
-                    r1 += dr;
+                    ADD_DELTAS();
                 }
             }
             else
@@ -475,9 +469,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     pb++;   /* skip alpha value */
 
                     /* add delta's values */
-                    b1 += db;
-                    g1 += dg;
-                    r1 += dr;
+                    ADD_DELTAS();
                 }
             }
         }
@@ -523,10 +515,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     *pb++ = a1 >> 8;
 
                     /* add delta's values */
-                    b1 += db;
-                    g1 += dg;
-                    r1 += dr;
-                    a1 += da;
+                    ADD_DELTAS_ALPHA();
                 }
             }
             else
@@ -565,10 +554,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     *pb++ = a1 >> 8;
 
                     /* add delta's values */
-                    b1 += db;
-                    g1 += dg;
-                    r1 += dr;
-                    a1 += da;
+                    ADD_DELTAS_ALPHA();
                 }
             }
         }
@@ -611,10 +597,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     *pb++ = a1 >> 8;
 
                     /* add delta's values */
-                    b1 += db;
-                    g1 += dg;
-                    r1 += dr;
-                    a1 += da;
+                    ADD_DELTAS_ALPHA();
                 }
             }
             else
@@ -653,10 +636,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                     *pb++ = a1 >> 8;
 
                     /* add delta's values */
-                    b1 += db;
-                    g1 += dg;
-                    r1 += dr;
-                    a1 += da;
+                    ADD_DELTAS_ALPHA();
                 }
             }
         }
