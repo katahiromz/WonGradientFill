@@ -54,7 +54,6 @@ static INLINE BYTE BayerDitheringHigh(ULONG x, ULONG y, BYTE b)
             return 127;
         return 0;
     }
-    return ((s_bayer_64[(y & 7) * 8 + (x & 7)] <= b) ? 255 : 0);
 }
 
 /* Calculate the extent of the verteces */
