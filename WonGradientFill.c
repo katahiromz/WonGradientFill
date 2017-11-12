@@ -57,43 +57,24 @@ static INLINE BYTE BayerDitheringHigh(ULONG x, ULONG y, BYTE b)
     return ((s_bayer_64[(y & 7) * 8 + (x & 7)] <= b) ? 255 : 0);
 }
 
-typedef struct XYMINMAX
-{
-    LONG xMin, yMin, xMax, yMax;
-} XYMINMAX;
-
 /* Calculate the extent of the verteces */
-static INLINE void
-GetXYMinMax(XYMINMAX *pXYMinMax, TRIVERTEX *pTriVertex, ULONG dwNumVertex)
-{
-    ULONG i;
-    LONG x, y, xMin, yMin, xMax, yMax;
-
-    /* first vertex */
-    xMin = xMax = pTriVertex[0].x;
-    yMin = yMax = pTriVertex[0].y;
-
-    /* get min/max */
-    for (i = 1; i < dwNumVertex; ++i)
-    {
-        x = pTriVertex[i].x;
-        if (x < xMin)
-            xMin = x;
-        if (x > xMax)
-            xMax = x;
-        y = pTriVertex[i].y;
-        if (y < yMin)
-            yMin = y;
-        if (y > yMax)
-            yMax = y;
-    }
-
-    /* store it */
-    pXYMinMax->xMin = xMin;
-    pXYMinMax->yMin = yMin;
-    pXYMinMax->xMax = xMax;
-    pXYMinMax->yMax = yMax;
-}
+#define GET_XY_MINMAX(i,x,y,pTriVertex,dwNumVertex) do { \
+    xMin = xMax = pTriVertex[0].x; \
+    yMin = yMax = pTriVertex[0].y; \
+    for (i = 1; i < dwNumVertex; ++i) \
+    { \
+        x = pTriVertex[i].x; \
+        if (x < xMin) \
+            xMin = x; \
+        if (x > xMax) \
+            xMax = x; \
+        y = pTriVertex[i].y; \
+        if (y < yMin) \
+            yMin = y; \
+        if (y > yMax) \
+            yMax = y; \
+    } \
+} while (0)
 
 #define ADD_DELTAS() \
     r1 += dr; \
@@ -400,8 +381,7 @@ static BOOL WINAPI
 GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
           VOID *pMesh, ULONG dwNumMesh, BOOL bVertical)
 {
-    XYMINMAX xyminmax;
-    LONG xMin, yMin, xMax, yMax, cx, cy;
+    LONG x, y, xMin, yMin, xMax, yMax, cx, cy;
     HDC hMemDC;
     HBITMAP hbmMem;
     HGDIOBJ hbmMemOld;
@@ -412,11 +392,7 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     GRADIENT_RECT *rect = (GRADIENT_RECT *)pMesh;
 
     /* get the extent */
-    GetXYMinMax(&xyminmax, pTriVertex, dwNumVertex);
-    xMin = xyminmax.xMin;
-    yMin = xyminmax.yMin;
-    xMax = xyminmax.xMax;
-    yMax = xyminmax.yMax;
+    GET_XY_MINMAX(i, x, y, pTriVertex, dwNumVertex);
 
     /* create a memory DC */
     hMemDC = CreateCompatibleDC(NULL);
@@ -496,8 +472,7 @@ static BOOL WINAPI
 GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
               VOID *pMesh, ULONG dwNumMesh)
 {
-    XYMINMAX xyminmax;
-    LONG xMin, yMin, xMax, yMax, cx, cy;
+    LONG x, y, xMin, yMin, xMax, yMax, cx, cy;
     BITMAPINFO bmi = { { sizeof(BITMAPINFOHEADER) } };
     BOOL bDither, bLow;
     HDC hMemDC;
@@ -509,11 +484,7 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     TRIVERTEX *v1, *v2, *v3;
 
     /* get the extent */
-    GetXYMinMax(&xyminmax, pTriVertex, dwNumVertex);
-    xMin = xyminmax.xMin;
-    yMin = xyminmax.yMin;
-    xMax = xyminmax.xMax;
-    yMax = xyminmax.yMax;
+    GET_XY_MINMAX(i, x, y, pTriVertex, dwNumVertex);
 
     /* create a memory DC */
     hMemDC = CreateCompatibleDC(NULL);
