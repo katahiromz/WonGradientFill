@@ -17,23 +17,29 @@
     #endif
 #endif
 
+#define BV(x) (x * 255 / 64)
+static const BYTE s_bayer_64[] =
+{
+    BV(0),  BV(48), BV(12), BV(60), BV(3),  BV(51), BV(15), BV(63),
+    BV(32), BV(16), BV(44), BV(28), BV(35), BV(19), BV(47), BV(31),
+    BV(8),  BV(56), BV(4),  BV(52), BV(11), BV(59), BV(7),  BV(55),
+    BV(40), BV(24), BV(36), BV(20), BV(43), BV(27), BV(39), BV(23),
+    BV(2),  BV(50), BV(14), BV(62), BV(1),  BV(49), BV(13), BV(61),
+    BV(34), BV(18), BV(46), BV(30), BV(33), BV(17), BV(45), BV(29),
+    BV(10), BV(58), BV(6),  BV(54), BV(9),  BV(57), BV(5),  BV(53),
+    BV(42), BV(26), BV(38), BV(22), BV(41), BV(25), BV(37), BV(21)
+};
+#undef BV
+
 /* Bayer Dithering */
 /* https://en.wikipedia.org/wiki/Ordered_dithering */
 static INLINE BYTE BayerDithering(ULONG x, ULONG y, BYTE b)
 {
-#if 1
-    #define BV(x) (x * 255 / 64)
-    static const BYTE s_bayer_64[] =
-    {
-        BV(0),  BV(48), BV(12), BV(60), BV(3),  BV(51), BV(15), BV(63),
-        BV(32), BV(16), BV(44), BV(28), BV(35), BV(19), BV(47), BV(31),
-        BV(8),  BV(56), BV(4),  BV(52), BV(11), BV(59), BV(7),  BV(55),
-        BV(40), BV(24), BV(36), BV(20), BV(43), BV(27), BV(39), BV(23),
-        BV(2),  BV(50), BV(14), BV(62), BV(1),  BV(49), BV(13), BV(61),
-        BV(34), BV(18), BV(46), BV(30), BV(33), BV(17), BV(45), BV(29),
-        BV(10), BV(58), BV(6),  BV(54), BV(9),  BV(57), BV(5),  BV(53),
-        BV(42), BV(26), BV(38), BV(22), BV(41), BV(25), BV(37), BV(21)
-    };
+    return ((s_bayer_64[(y & 7) * 8 + (x & 7)] <= b) ? 255 : 0);
+}
+
+static INLINE BYTE BayerDitheringHigh(ULONG x, ULONG y, BYTE b)
+{
     const BYTE value1 = s_bayer_64[(y & 7) * 8 + (x & 7)];
     const BYTE value2 = s_bayer_64[(y & 7) * 8 + 7 ^ (x & 7)];
     if (value1 <= b)
@@ -48,19 +54,7 @@ static INLINE BYTE BayerDithering(ULONG x, ULONG y, BYTE b)
             return 127;
         return 0;
     }
-    /* return ((s_bayer_64[(y & 7) * 8 + (x & 7)] <= b) ? 255 : 0); */
-#else
-    #define BV(x) (x * 255 / 16)
-    static const BYTE s_bayer_16[] =
-    {
-        BV(0), BV(8), BV(2), BV(10),
-        BV(12), BV(4), BV(14), BV(6),
-        BV(3), BV(11), BV(1), BV(9),
-        BV(15), BV(7), BV(13), BV(5)
-    };
-    return ((s_bayer_16[(y & 3) * 4 + (x & 3)] <= b) ? 255 : 0);
-#endif
-#undef BV
+    return ((s_bayer_64[(y & 7) * 8 + (x & 7)] <= b) ? 255 : 0);
 }
 
 typedef struct XYMINMAX
@@ -134,6 +128,11 @@ GetXYMinMax(XYMINMAX *pXYMinMax, TRIVERTEX *pTriVertex, ULONG dwNumVertex)
     *pb++ = BayerDithering(x1, y1, g1 >> 8); \
     *pb++ = BayerDithering(x1, y1, r1 >> 8); \
     pb++;   /* skip alpha value */
+#define DO_PIXEL_HIGH() \
+    *pb++ = BayerDitheringHigh(x1, y1, b1 >> 8); \
+    *pb++ = BayerDitheringHigh(x1, y1, g1 >> 8); \
+    *pb++ = BayerDitheringHigh(x1, y1, r1 >> 8); \
+    pb++;   /* skip alpha value */
 #define DO_PIXEL_ALPHA() \
     *pb++ = b1 >> 8; \
     *pb++ = g1 >> 8; \
@@ -142,7 +141,7 @@ GetXYMinMax(XYMINMAX *pXYMinMax, TRIVERTEX *pTriVertex, ULONG dwNumVertex)
 
 static void WINAPI
 MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
-              GRADIENT_RECT *rect, INT xMin, INT yMin, BOOL bDither)
+              GRADIENT_RECT *rect, INT xMin, INT yMin, BOOL bDither, BOOL bLow)
 {
     COLOR16 r1, g1, b1, a1;
     COLOR16 dr, dg, db, da;
@@ -194,20 +193,41 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
     if (bDither)
     {
         /* fill rectangle horizontally (dithering) */
-        for (x1 = 0; x1 < dx; x1++)
+        if (bLow)
         {
-            /* render the column */
-            for (y1 = 0; y1 < dy; y1++)
+            for (x1 = 0; x1 < dx; x1++)
             {
-                DO_PIXEL_LOW();
+                /* render the column */
+                for (y1 = 0; y1 < dy; y1++)
+                {
+                    DO_PIXEL_LOW();
 
-                pb += stride - 4;   /* next position */
+                    pb += stride - 4;   /* next position */
+                }
+
+                /* add delta's values */
+                ADD_DELTAS();
+
+                pb -= dy * stride - 4;  /* next position */
             }
+        }
+        else
+        {
+            for (x1 = 0; x1 < dx; x1++)
+            {
+                /* render the column */
+                for (y1 = 0; y1 < dy; y1++)
+                {
+                    DO_PIXEL_HIGH();
 
-            /* add delta's values */
-            ADD_DELTAS();
+                    pb += stride - 4;   /* next position */
+                }
 
-            pb -= dy * stride - 4;  /* next position */
+                /* add delta's values */
+                ADD_DELTAS();
+
+                pb -= dy * stride - 4;  /* next position */
+            }
         }
     }
     else
@@ -233,7 +253,7 @@ MeshFillRectH(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
 
 static void WINAPI
 MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
-              GRADIENT_RECT *rect, INT xMin, INT yMin, BOOL bDither)
+              GRADIENT_RECT *rect, INT xMin, INT yMin, BOOL bDither, BOOL bLow)
 {
     COLOR16 r1, g1, b1, a1;
     COLOR16 dr, dg, db, da;
@@ -285,20 +305,41 @@ MeshFillRectV(LPBYTE pbBits, ULONG cx, ULONG cy, TRIVERTEX *pTriVertex,
     if (bDither)
     {
         /* fill rectangle vertically (dithering) */
-        for (y1 = 0; y1 < dy; y1++)
+        if (bLow)
         {
-            /* render one row */
-            for (x1 = 0; x1 < dx; x1++)
+            for (y1 = 0; y1 < dy; y1++)
             {
-                DO_PIXEL_LOW();
+                /* render one row */
+                for (x1 = 0; x1 < dx; x1++)
+                {
+                    DO_PIXEL_LOW();
+                }
+
+                /* add delta's values */
+                ADD_DELTAS();
+
+                /* next position */
+                pb -= dx * 4;
+                pb += stride;
             }
+        }
+        else
+        {
+            for (y1 = 0; y1 < dy; y1++)
+            {
+                /* render one row */
+                for (x1 = 0; x1 < dx; x1++)
+                {
+                    DO_PIXEL_HIGH();
+                }
 
-            /* add delta's values */
-            ADD_DELTAS();
+                /* add delta's values */
+                ADD_DELTAS();
 
-            /* next position */
-            pb -= dx * 4;
-            pb += stride;
+                /* next position */
+                pb -= dx * 4;
+                pb += stride;
+            }
         }
     }
     else
@@ -347,7 +388,7 @@ static void WINAPI
 MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
                  TRIVERTEX *v1, TRIVERTEX *v2, TRIVERTEX *v3,
                  GRADIENT_TRIANGLE *triangle,
-                 INT xMin, INT yMin, BOOL bDither)
+                 INT xMin, INT yMin, BOOL bDither, BOOL bLow)
 {
     COLOR16 r1, g1, b1, a1, r2, g2, b2, a2;
     COLOR16 dr, dg, db, da;
@@ -359,91 +400,185 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
 
     if (bDither)
     {
-        /* the upper triangle (dithering) */
-        for (y1 = v1->y; y1 < v2->y; y1++)
+        if (bLow)
         {
-            if (v2->x < v3->x)
+            /* the upper triangle (dithering) */
+            for (y1 = v1->y; y1 < v2->y; y1++)
             {
-                /* calculate the edge values */
-                CALC_EDGE(v1, v2, v1, v3);
-
-                /* calculate delta's */
-                CALC_DELTAS();
-
-                /* calculate the first position */
-                pb = &GET_BYTE(x1 - xMin, y1 - yMin);
-
-                /* do rendering */
-                for ( ; x1 < x2; x1++)
+                if (v2->x < v3->x)
                 {
-                    DO_PIXEL_LOW();
+                    /* calculate the edge values */
+                    CALC_EDGE(v1, v2, v1, v3);
 
-                    /* add delta's values */
-                    ADD_DELTAS();
+                    /* calculate delta's */
+                    CALC_DELTAS();
+
+                    /* calculate the first position */
+                    pb = &GET_BYTE(x1 - xMin, y1 - yMin);
+
+                    /* do rendering */
+                    for ( ; x1 < x2; x1++)
+                    {
+                        DO_PIXEL_LOW();
+
+                        /* add delta's values */
+                        ADD_DELTAS();
+                    }
+                }
+                else
+                {
+                    /* calculate the edge values */
+                    CALC_EDGE(v1, v3, v1, v2);
+
+                    /* calculate delta's */
+                    CALC_DELTAS();
+
+                    /* calculate the first position */
+                    pb = &GET_BYTE(x1 - xMin, y1 - yMin);
+
+                    /* do rendering */
+                    for ( ; x1 < x2; x1++)
+                    {
+                        DO_PIXEL_LOW();
+
+                        /* add delta's values */
+                        ADD_DELTAS();
+                    }
                 }
             }
-            else
+            /* the lower triangle (dithering) */
+            for (y1 = v2->y; y1 < v3->y; y1++)
             {
-                /* calculate the edge values */
-                CALC_EDGE(v1, v3, v1, v2);
-
-                /* calculate delta's */
-                CALC_DELTAS();
-
-                /* calculate the first position */
-                pb = &GET_BYTE(x1 - xMin, y1 - yMin);
-
-                /* do rendering */
-                for ( ; x1 < x2; x1++)
+                if (v2->x < v3->x)
                 {
-                    DO_PIXEL_LOW();
+                    /* calculate the edge values */
+                    CALC_EDGE(v2, v3, v1, v3);
 
-                    /* add delta's values */
-                    ADD_DELTAS();
+                    /* calculate delta's */
+                    CALC_DELTAS();
+
+                    /* calculate the first position */
+                    pb = &GET_BYTE(x1 - xMin, y1 - yMin);
+
+                    /* do rendering */
+                    for ( ; x1 < x2; x1++)
+                    {
+                        DO_PIXEL_LOW();
+
+                        /* add delta's values */
+                        ADD_DELTAS();
+                    }
+                }
+                else
+                {
+                    /* calculate the edge values */
+                    CALC_EDGE(v1, v3, v2, v3);
+
+                    /* calculate delta's */
+                    CALC_DELTAS();
+
+                    /* calculate the first position */
+                    pb = &GET_BYTE(x1 - xMin, y1 - yMin);
+
+                    /* do rendering */
+                    for ( ; x1 < x2; x1++)
+                    {
+                        DO_PIXEL_LOW();
+
+                        /* add delta's values */
+                        ADD_DELTAS();
+                    }
                 }
             }
         }
-        /* the lower triangle (dithering) */
-        for (y1 = v2->y; y1 < v3->y; y1++)
+        else
         {
-            if (v2->x < v3->x)
+            /* the upper triangle (dithering) */
+            for (y1 = v1->y; y1 < v2->y; y1++)
             {
-                /* calculate the edge values */
-                CALC_EDGE(v2, v3, v1, v3);
-
-                /* calculate delta's */
-                CALC_DELTAS();
-
-                /* calculate the first position */
-                pb = &GET_BYTE(x1 - xMin, y1 - yMin);
-
-                /* do rendering */
-                for ( ; x1 < x2; x1++)
+                if (v2->x < v3->x)
                 {
-                    DO_PIXEL_LOW();
+                    /* calculate the edge values */
+                    CALC_EDGE(v1, v2, v1, v3);
 
-                    /* add delta's values */
-                    ADD_DELTAS();
+                    /* calculate delta's */
+                    CALC_DELTAS();
+
+                    /* calculate the first position */
+                    pb = &GET_BYTE(x1 - xMin, y1 - yMin);
+
+                    /* do rendering */
+                    for ( ; x1 < x2; x1++)
+                    {
+                        DO_PIXEL_HIGH();
+
+                        /* add delta's values */
+                        ADD_DELTAS();
+                    }
+                }
+                else
+                {
+                    /* calculate the edge values */
+                    CALC_EDGE(v1, v3, v1, v2);
+
+                    /* calculate delta's */
+                    CALC_DELTAS();
+
+                    /* calculate the first position */
+                    pb = &GET_BYTE(x1 - xMin, y1 - yMin);
+
+                    /* do rendering */
+                    for ( ; x1 < x2; x1++)
+                    {
+                        DO_PIXEL_HIGH();
+
+                        /* add delta's values */
+                        ADD_DELTAS();
+                    }
                 }
             }
-            else
+            /* the lower triangle (dithering) */
+            for (y1 = v2->y; y1 < v3->y; y1++)
             {
-                /* calculate the edge values */
-                CALC_EDGE(v1, v3, v2, v3);
-
-                /* calculate delta's */
-                CALC_DELTAS();
-
-                /* calculate the first position */
-                pb = &GET_BYTE(x1 - xMin, y1 - yMin);
-
-                /* do rendering */
-                for ( ; x1 < x2; x1++)
+                if (v2->x < v3->x)
                 {
-                    DO_PIXEL_LOW();
+                    /* calculate the edge values */
+                    CALC_EDGE(v2, v3, v1, v3);
 
-                    /* add delta's values */
-                    ADD_DELTAS();
+                    /* calculate delta's */
+                    CALC_DELTAS();
+
+                    /* calculate the first position */
+                    pb = &GET_BYTE(x1 - xMin, y1 - yMin);
+
+                    /* do rendering */
+                    for ( ; x1 < x2; x1++)
+                    {
+                        DO_PIXEL_HIGH();
+
+                        /* add delta's values */
+                        ADD_DELTAS();
+                    }
+                }
+                else
+                {
+                    /* calculate the edge values */
+                    CALC_EDGE(v1, v3, v2, v3);
+
+                    /* calculate delta's */
+                    CALC_DELTAS();
+
+                    /* calculate the first position */
+                    pb = &GET_BYTE(x1 - xMin, y1 - yMin);
+
+                    /* do rendering */
+                    for ( ; x1 < x2; x1++)
+                    {
+                        DO_PIXEL_HIGH();
+
+                        /* add delta's values */
+                        ADD_DELTAS();
+                    }
                 }
             }
         }
@@ -552,7 +687,7 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     HGDIOBJ hbmMemOld;
     LPBYTE pbBits;
     BITMAPINFO bmi = { { sizeof(BITMAPINFOHEADER) } };
-    BOOL bDither;
+    BOOL bDither, bLow;
     ULONG i;
     GRADIENT_RECT *rect = (GRADIENT_RECT *)pMesh;
 
@@ -589,10 +724,12 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         if (hbm && GetObject(hbm, sizeof(BITMAP), &bm))
         {
             bDither = bm.bmBitsPixel < 24 || GetDeviceCaps(hDC, BITSPIXEL) < 24;
+            bLow = bm.bmBitsPixel <= 4 || GetDeviceCaps(hDC, BITSPIXEL) <= 4;
         }
         else
         {
             bDither = GetDeviceCaps(hDC, BITSPIXEL) < 24;
+            bLow = GetDeviceCaps(hDC, BITSPIXEL) <= 4;
         }
     }
 
@@ -610,7 +747,7 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         /* vertical */
         for (i = 0; i < dwNumMesh; ++i, ++rect)
         {
-            MeshFillRectV(pbBits, cx, cy, pTriVertex, rect, xMin, yMin, bDither);
+            MeshFillRectV(pbBits, cx, cy, pTriVertex, rect, xMin, yMin, bDither, bLow);
         }
     }
     else
@@ -618,7 +755,7 @@ GFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         /* horizontal */
         for (i = 0; i < dwNumMesh; ++i, ++rect)
         {
-            MeshFillRectH(pbBits, cx, cy, pTriVertex, rect, xMin, yMin, bDither);
+            MeshFillRectH(pbBits, cx, cy, pTriVertex, rect, xMin, yMin, bDither, bLow);
         }
     }
 
@@ -642,7 +779,7 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
     XYMINMAX xyminmax;
     LONG xMin, yMin, xMax, yMax, cx, cy;
     BITMAPINFO bmi = { { sizeof(BITMAPINFOHEADER) } };
-    BOOL bDither;
+    BOOL bDither, bLow;
     HDC hMemDC;
     HBITMAP hbmMem;
     HGDIOBJ hbmMemOld;
@@ -684,10 +821,12 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         if (hbm && GetObject(hbm, sizeof(BITMAP), &bm))
         {
             bDither = bm.bmBitsPixel < 24 || GetDeviceCaps(hDC, BITSPIXEL) < 24;
+            bLow = bm.bmBitsPixel <= 4 || GetDeviceCaps(hDC, BITSPIXEL) <= 4;
         }
         else
         {
             bDither = GetDeviceCaps(hDC, BITSPIXEL) < 24;
+            bLow = GetDeviceCaps(hDC, BITSPIXEL) <= 4;
         }
     }
 
@@ -727,7 +866,7 @@ GFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
         }
         assert(v1->y <= v2->y && v2->y <= v3->y);
 
-        MeshFillTriangle(pbBits, cx, cy, v1, v2, v3, triangle, xMin, yMin, bDither);
+        MeshFillTriangle(pbBits, cx, cy, v1, v2, v3, triangle, xMin, yMin, bDither, bLow);
     }
 
     /* transfer to hDC */
