@@ -12,6 +12,8 @@
 #ifndef INLINE
     #ifdef __cplusplus
         #define INLINE inline
+    #elif (__STDC_VERSION__ >= 199901L)
+        #define INLINE inline
     #else
         #define INLINE __inline
     #endif
