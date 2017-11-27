@@ -57,7 +57,7 @@ WonGradientFill(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
 
 /**************************************************************************/
 
-#if defined(_WONVER) && (_WONVER <= 0x0400)
+#if defined(_WONVER) && (_WONVER < 0x0410)
     #define GradientFill WonGradientFill
 #endif
 
