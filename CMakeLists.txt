@@ -9,6 +9,7 @@ cmake_minimum_required(VERSION 2.4)
 # project name and language
 project(WonGradientFill CXX)
 enable_language(C)
+enable_language(RC)
 
 # check build type
 if (NOT CMAKE_BUILD_TYPE)
