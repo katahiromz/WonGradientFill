@@ -7,7 +7,7 @@
 cmake_minimum_required(VERSION 2.4)
 
 # project name and language
-project(MGradientFillTest CXX)
+project(WonGradientFill CXX)
 enable_language(C)
 
 # check build type
@@ -24,14 +24,6 @@ if (NOT uppercase_CMAKE_BUILD_TYPE MATCHES "^(DEBUG|RELEASE|RELWITHDEBINFO|MINSI
     message(FATAL_ERROR "Invalid value for CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 endif()
 
-# define NDEBUG
-string(CONCAT CMAKE_C_FLAGS_RELEASE " -DNDEBUG")
-string(CONCAT CMAKE_C_FLAGS_RELWITHDEBINFO " -DNDEBUG")
-string(CONCAT CMAKE_C_FLAGS_MINSIZEREL " -DNDEBUG")
-string(CONCAT CMAKE_CXX_FLAGS_RELEASE " -DNDEBUG")
-string(CONCAT CMAKE_CXX_FLAGS_RELWITHDEBINFO " -DNDEBUG")
-string(CONCAT CMAKE_CXX_FLAGS_MINSIZEREL " -DNDEBUG")
-
 # set output directory (build/)
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
@@ -43,48 +35,12 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 if (CMAKE_HOST_WIN32)
     # enable Win32 resource
     ENABLE_LANGUAGE(RC)
-
-    # Win32
-    add_executable(MGradientFillTest WIN32 MGradientFillTest.cpp WonGradientFill.c)
 else()
     message(FATAL_ERROR "To build this project, use Win32 C++ compiler")
 endif()
 
-# link
+# an EXE
+add_executable(MGradientFillTest WIN32 MGradientFillTest.cpp WonGradientFill.c)
 target_link_libraries(MGradientFillTest gdi32 msimg32)
-
-##############################################################################
-
-# do statically link
-set_target_properties(MGradientFillTest PROPERTIES LINK_DEPENDS_NO_SHARED 1)
-set_target_properties(MGradientFillTest PROPERTIES LINK_SEARCH_START_STATIC 1)
-set_target_properties(MGradientFillTest PROPERTIES LINK_SEARCH_END_STATIC 1)
-
-set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-SET(BUILD_SHARED_LIBRARIES OFF)
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    # using Clang
-    set(CMAKE_EXE_LINKER_FLAGS "-static")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    # using GCC
-    set(CMAKE_EXE_LINKER_FLAGS "-static")
-endif()
-
-# replace "/MD" with "/MT" (building without runtime DLLs)
-if(1)
-    set(CompilerFlags
-        CMAKE_C_FLAGS
-        CMAKE_C_FLAGS_DEBUG
-        CMAKE_C_FLAGS_RELEASE
-        CMAKE_C_FLAGS_RELWITHDEBINFO
-        CMAKE_CXX_FLAGS
-        CMAKE_CXX_FLAGS_DEBUG
-        CMAKE_CXX_FLAGS_RELEASE
-        CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-    foreach(CompilerFlags ${CompilerFlags})
-        string(REPLACE "/MD" "/MT" ${CompilerFlags} "${${CompilerFlags}}")
-    endforeach()
-endif()
 
 ##############################################################################
