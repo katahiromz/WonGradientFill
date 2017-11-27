@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "MWindowBase.hpp"
+#include "WonGradientFill.h"
 #include <cmath>
 
 #define INTERVAL 100
@@ -20,11 +21,6 @@ typedef struct BITMAPINFODX
     BITMAPINFOHEADER bmiHeader;
     RGBQUAD bmiColors[256];
 } BITMAPINFODX;
-
-extern "C"
-BOOL WINAPI
-WonGradientFill(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
-                VOID *pMesh, ULONG dwNumMesh, ULONG dwMode);
 
 //////////////////////////////////////////////////////////////////////////////
 

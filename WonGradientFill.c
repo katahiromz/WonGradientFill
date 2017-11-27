@@ -1,7 +1,12 @@
 /* WonGradientFill.c --- GradientFill API clone by katahiromz */
 /* Copyright (C) 2017 Katayama Hirofumi MZ. License: CC0 */
-#include <windows.h>
-#include <assert.h>
+#include "WonGradientFill.h"
+
+#ifdef __cplusplus
+    #include <cassert>
+#else
+    #include <assert.h>
+#endif
 
 /*
  * Operation of WonGradientFill function will be done by linear interpolation,
@@ -380,7 +385,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
     bmi.bmiHeader.biHeight = -cy; \
     bmi.bmiHeader.biPlanes = 1; \
     bmi.bmiHeader.biBitCount = 32; \
-    hbmMem = CreateDIBSection(hMemDC, &bmi, DIB_RGB_COLORS, (VOID **)&pbBits, NULL, 0); \
+    hbmMem = CreateDIBSection(hMemDC, &bmi, DIB_RGB_COLORS, (void **)&pbBits, NULL, 0); \
     if (hbmMem == NULL) \
     { \
         DeleteDC(hMemDC); \
@@ -402,7 +407,7 @@ MeshFillTriangle(LPBYTE pbBits, ULONG cx, ULONG cy,
 
 static BOOL WINAPI
 IntGradFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
-          VOID *pMesh, ULONG dwNumMesh, BOOL bVertical)
+          void *pMesh, ULONG dwNumMesh, BOOL bVertical)
 {
     LONG x, y, xMin, yMin, xMax, yMax, cx, cy;
     HDC hMemDC;
@@ -470,7 +475,7 @@ IntGradFillRect(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
 
 static BOOL WINAPI
 IntGradFillTriangle(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
-              VOID *pMesh, ULONG dwNumMesh)
+              void *pMesh, ULONG dwNumMesh)
 {
     LONG x, y, xMin, yMin, xMax, yMax, cx, cy;
     BITMAPINFO bmi = { { sizeof(BITMAPINFOHEADER) } };
@@ -549,7 +554,7 @@ extern "C"
 #endif
 BOOL WINAPI
 WonGradientFill(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
-                VOID *pMesh, ULONG dwNumMesh, ULONG dwMode)
+                void *pMesh, ULONG dwNumMesh, ULONG dwMode)
 {
     if (dwNumVertex == 0 || dwNumMesh == 0)
         return FALSE;   /* nothing to do */
