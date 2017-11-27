@@ -2,7 +2,7 @@
 /**************************************************************************/
 
 #ifndef WONGRADIENTFILL_H_
-#define WONGRADIENTFILL_H_      2   /* Version 2 */
+#define WONGRADIENTFILL_H_      3   /* Version 3 */
 
 #ifndef _INC_WINDOWS
     #include <windows.h>
@@ -54,5 +54,13 @@ WonGradientFill(HDC hDC, TRIVERTEX *pTriVertex, ULONG dwNumVertex,
 #ifdef __cplusplus
 } // extern "C"
 #endif
+
+/**************************************************************************/
+
+#if defined(_WONVER) && (_WONVER <= 0x0400)
+    #define GradientFill WonGradientFill
+#endif
+
+/**************************************************************************/
 
 #endif  /* ndef WONGRADIENTFILL_H_ */
