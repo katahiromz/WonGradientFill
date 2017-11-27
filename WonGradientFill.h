@@ -2,7 +2,7 @@
 /**************************************************************************/
 
 #ifndef WONGRADIENTFILL_H_
-#define WONGRADIENTFILL_H_      1   /* Version 1 */
+#define WONGRADIENTFILL_H_      2   /* Version 2 */
 
 #ifndef _INC_WINDOWS
     #include <windows.h>
@@ -11,6 +11,37 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**************************************************************************/
+
+#ifndef GRADIENT_FILL_RECT_H
+    #define GRADIENT_FILL_RECT_H 0x00000000
+    #define GRADIENT_FILL_RECT_V 0x00000001
+    #define GRADIENT_FILL_TRIANGLE 0x00000002
+    #define GRADIENT_FILL_OP_FLAG 0x000000ff
+
+    typedef USHORT COLOR16;
+
+    typedef struct {
+        LONG x;
+        LONG y;
+        COLOR16 Red;
+        COLOR16 Green;
+        COLOR16 Blue;
+        COLOR16 Alpha;
+    } TRIVERTEX;
+
+    typedef struct {
+        ULONG Vertex1;
+        ULONG Vertex2;
+        ULONG Vertex3;
+    } GRADIENT_TRIANGLE;
+
+    typedef struct {
+        ULONG UpperLeft;
+        ULONG LowerRight;
+    } GRADIENT_RECT;
+#endif  /* ndef GRADIENT_FILL_RECT_H */
 
 /**************************************************************************/
 
