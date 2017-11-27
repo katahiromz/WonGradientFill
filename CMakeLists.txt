@@ -32,10 +32,7 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 ##############################################################################
 
 # Win32 or not?
-if (CMAKE_HOST_WIN32)
-    # enable Win32 resource
-    ENABLE_LANGUAGE(RC)
-else()
+if (NOT CMAKE_HOST_WIN32)
     message(FATAL_ERROR "To build this project, use Win32 C++ compiler")
 endif()
 
