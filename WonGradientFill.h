@@ -1,8 +1,9 @@
-/* WonGradientFill.h --- Wonders GradientFill */
+/* WonGradientFill.h --- Wonders API GradientFill */
+/* Copyright (C) 2017 Katayama Hirofumi MZ. License: CC0 */
 /**************************************************************************/
 
 #ifndef WONGRADIENTFILL_H_
-#define WONGRADIENTFILL_H_      4   /* Version 4 */
+#define WONGRADIENTFILL_H_      5   /* Version 5 */
 
 #ifndef _INC_WINDOWS
     #include <windows.h>

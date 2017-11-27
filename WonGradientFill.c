@@ -1,5 +1,7 @@
-/* WonGradientFill.c --- GradientFill API clone by katahiromz */
+/* WonGradientFill.c --- Wonders API GradientFill */
 /* Copyright (C) 2017 Katayama Hirofumi MZ. License: CC0 */
+/**************************************************************************/
+
 #include "WonGradientFill.h"
 
 #ifdef __cplusplus
